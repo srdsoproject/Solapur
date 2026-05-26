@@ -12,17 +12,57 @@ st.set_page_config(
     layout="wide"
 )
 
-# ====================== SHEET CONFIG ======================
+# ====================== LOGIN FUNCTION ======================
 
-SHEET_ID = "1bEQ_o020l2rTmFRKvTjKHQSdrCp3N6BUEXIRybHDios"
-SHEET_NAME = "OPTG"
+def login():
+
+    # Session state
+    if "authenticated" not in st.session_state:
+        st.session_state.authenticated = False
+
+    # If already logged in
+    if st.session_state.authenticated:
+        return True
+
+    st.title("🔐 Login Required")
+
+    username = st.text_input("User ID")
+    password = st.text_input("Password", type="password")
+
+    login_button = st.button("Login")
+
+    if login_button:
+
+        secret_username = st.secrets["APP_USERNAME"]
+        secret_password = st.secrets["APP_PASSWORD"]
+
+        if username == secret_username and password == secret_password:
+            st.session_state.authenticated = True
+            st.success("✅ Login successful")
+            st.rerun()
+
+        else:
+            st.error("❌ Invalid User ID or Password")
+
+    return False
+
+# ====================== AUTH CHECK ======================
+
+if not login():
+    st.stop()
+
+# ====================== LOAD SECRET CONFIG ======================
+
+SHEET_ID = st.secrets["SHEET_ID"]
+SHEET_NAME = st.secrets["SHEET_NAME"]
 
 # ====================== LOAD GOOGLE SHEET ======================
 
 @st.cache_data(ttl=300)
 def load_google_sheet():
+
     try:
-        # Authenticate using Streamlit Secrets
+
         creds = Credentials.from_service_account_info(
             st.secrets["gcp_service_account"],
             scopes=[
@@ -31,19 +71,14 @@ def load_google_sheet():
             ]
         )
 
-        # Authorize gspread
         gc = gspread.authorize(creds)
 
-        # Open Google Sheet
         sh = gc.open_by_key(SHEET_ID)
 
-        # Open worksheet
         worksheet = sh.worksheet(SHEET_NAME)
 
-        # Get records
         data = worksheet.get_all_records()
 
-        # Convert to DataFrame
         df = pd.DataFrame(data)
 
         # Clean column names
@@ -52,13 +87,15 @@ def load_google_sheet():
         return df
 
     except Exception as e:
-        st.error(f"❌ Failed to connect to Google Sheet")
+
+        st.error("❌ Failed to connect to Google Sheet")
+
         st.exception(e)
 
         st.info("""
         🔧 Please verify:
-        1. Secrets are correctly added in Streamlit
-        2. Google Sheet is shared with service account email
+        1. Secrets are correctly added
+        2. Google Sheet is shared with service account
         3. SHEET_ID and SHEET_NAME are correct
         """)
 
@@ -69,28 +106,33 @@ def load_google_sheet():
 def main_portal():
 
     st.title("🚉 Solapur Division Operating Department")
+
     st.subheader("Equipment Inventory Portal")
 
     st.caption(
         f"Last Updated: {datetime.now().strftime('%d %B %Y, %H:%M')}"
     )
 
-    # Load data
+    # ====================== SIDEBAR ======================
+
+    st.sidebar.success("✅ Logged In")
+
+    if st.sidebar.button("Logout"):
+        st.session_state.authenticated = False
+        st.rerun()
+
+    page = st.sidebar.radio(
+        "Navigation",
+        ["Dashboard", "All Stations", "Search"]
+    )
+
+    # ====================== LOAD DATA ======================
+
     df = load_google_sheet()
 
-    # If data not loaded
     if df.empty:
         st.warning("⚠️ No data available.")
         return
-
-    # ====================== SIDEBAR ======================
-
-    st.sidebar.title("Navigation")
-
-    page = st.sidebar.radio(
-        "Go to",
-        ["Dashboard", "All Stations", "Search"]
-    )
 
     # ====================== DASHBOARD ======================
 
@@ -102,14 +144,14 @@ def main_portal():
 
         with col1:
             st.metric(
-                label="Total Stations",
-                value=len(df)
+                "Total Stations",
+                len(df)
             )
 
         with col2:
             st.metric(
-                label="Equipment Types",
-                value=len(df.columns) - 1
+                "Equipment Types",
+                len(df.columns) - 1
             )
 
         st.divider()
@@ -134,8 +176,8 @@ def main_portal():
 
         filtered_df = df.copy()
 
-        # Filter stations
         if search:
+
             filtered_df = df[
                 df["STATION"]
                 .astype(str)
@@ -146,12 +188,14 @@ def main_portal():
             st.info("No stations found.")
             return
 
-        # Display stations
         for _, row in filtered_df.iterrows():
 
-            station_name = row.get("STATION", "Unknown Station")
+            station_name = row.get(
+                "STATION",
+                "Unknown Station"
+            )
 
-            with st.expander(f"🚉 {station_name}", expanded=False):
+            with st.expander(f"🚉 {station_name}"):
 
                 equipment_columns = [
                     col for col in df.columns
@@ -168,6 +212,7 @@ def main_portal():
                         value = 0
 
                     with cols[i % 3]:
+
                         st.metric(
                             label=col,
                             value=value
@@ -199,7 +244,9 @@ def main_portal():
 
             if not result.empty:
 
-                st.success(f"Found {len(result)} matching record(s).")
+                st.success(
+                    f"Found {len(result)} matching record(s)."
+                )
 
                 st.dataframe(
                     result,
