@@ -116,11 +116,19 @@ def main_portal():
     # ====================== SIDEBAR ======================
 
     st.sidebar.success("✅ Logged In")
-
+    
+    # Logout Button
     if st.sidebar.button("Logout"):
         st.session_state.authenticated = False
         st.rerun()
-
+    
+    # Refresh Data Button
+    if st.sidebar.button("🔄 Refresh Data"):
+        load_google_sheet.clear()
+        st.success("✅ Data refreshed successfully")
+        st.rerun()
+    
+    # Navigation
     page = st.sidebar.radio(
         "Navigation",
         ["Dashboard", "All Stations", "Search"]
