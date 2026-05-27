@@ -329,7 +329,7 @@ def main_portal():
 
     # ====================== TOP METRICS ======================
     total_stations = len(df)
-    total_equipment = len(df.columns) - 1
+    total_equipment = len(df.columns) - 2
 
     col1, col2 = st.columns(2)
 
