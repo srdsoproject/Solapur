@@ -6,7 +6,7 @@ from datetime import datetime
 
 # ====================== PAGE CONFIG ======================
 st.set_page_config(
-    page_title="Solapur Division Operating",
+    page_title="Solapur Division Equipment Inventory Management System",
     page_icon="🚉",
     layout="wide"
 )
@@ -380,8 +380,8 @@ def main_portal():
     # ====================== HEADER ======================
     st.markdown(f"""
     <div class="header-box">
-        <h1>🚉 Solapur Division Operating Department</h1>
-        <h4>Equipment Inventory Management System</h4>
+        <h1>🚉 Solapur Division Equipment Inventory Management System</h1>
+        <h4>An initiative by Safety Branch, Solapur Division, Central Railway</h4>
     </div>
     """, unsafe_allow_html=True)
 
