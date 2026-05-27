@@ -382,9 +382,6 @@ def main_portal():
     <div class="header-box">
         <h1>🚉 Solapur Division Operating Department</h1>
         <h4>Equipment Inventory Management System</h4>
-        <div class="small-text">
-            Last Updated: {datetime.now().strftime('%d %B %Y, %H:%M')}
-        </div>
     </div>
     """, unsafe_allow_html=True)
 
