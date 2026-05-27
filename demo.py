@@ -414,7 +414,7 @@ def main_portal():
         st.metric("🚏 Total Stations/Cabin/Yard", total_stations)
 
     with col2:
-        st.metric("🛠 Total Equipment Available", total_equipment)
+        st.metric("🛠 Total Equipment Available", total_equipment, 'items')
 
     st.divider()
 
