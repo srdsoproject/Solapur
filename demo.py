@@ -334,7 +334,7 @@ def main_portal():
     col1, col2 = st.columns(2)
 
     with col1:
-        st.metric("📍 Total Stations", total_stations)
+        st.metric("🚏 Total Stations", total_stations)
 
     with col2:
         st.metric("🛠 Total Equipment Types", total_equipment)
