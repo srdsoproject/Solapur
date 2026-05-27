@@ -12,156 +12,192 @@ st.set_page_config(
 )
 
 # ====================== CUSTOM CSS ======================
-# ====================== CUSTOM CSS ======================
+# ====================== PROFESSIONAL UI CSS ======================
 st.markdown("""
 <style>
 
-/* Main App Background */
+/* ===== MAIN APP ===== */
 .stApp {
-    background-color: #0f1117;
-    color: #f1f5f9;
+    background-color: #f4f6f9;
+    color: #1e293b;
 }
 
-/* Main Container */
+/* ===== MAIN CONTAINER ===== */
 .block-container {
-    padding-top: 1rem;
+    padding-top: 1.2rem;
     padding-bottom: 1rem;
+    max-width: 1400px;
 }
 
-/* Sidebar */
+/* ===== SIDEBAR ===== */
 [data-testid="stSidebar"] {
-    background-color: #000000;
-    border-right: 1px solid #262730;
+    background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+    border-right: 1px solid #cbd5e1;
 }
 
 [data-testid="stSidebar"] * {
-    color: #ffffff;
+    color: white;
 }
 
-/* Header */
+/* ===== HEADER ===== */
 .header-box {
-    background: linear-gradient(135deg, #000000, #1e293b);
-    padding: 28px;
-    border-radius: 18px;
-    margin-bottom: 20px;
-    border: 1px solid #2d3748;
-    box-shadow: 0px 4px 14px rgba(0,0,0,0.4);
+    background: linear-gradient(135deg, #1d4ed8, #0f172a);
+    padding: 30px;
+    border-radius: 20px;
+    margin-bottom: 25px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
 }
 
 .header-box h1 {
-    color: #ffffff;
-    margin-bottom: 5px;
+    color: white;
+    margin-bottom: 8px;
+    font-size: 38px;
+    font-weight: 700;
 }
 
 .header-box h4 {
-    color: #cbd5e1;
+    color: #dbeafe;
     margin-top: 0;
+    font-weight: 400;
 }
 
 .small-text {
-    color: #94a3b8;
-    font-size: 13px;
+    color: #cbd5e1;
+    font-size: 14px;
+    margin-top: 10px;
 }
 
-/* Station Card */
+/* ===== TOP METRICS ===== */
+[data-testid="metric-container"] {
+    background: white;
+    border: 1px solid #e2e8f0;
+    padding: 18px;
+    border-radius: 18px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+}
+
+/* ===== STATION CARD ===== */
 .station-card {
-    background: #161b22;
-    border: 1px solid #30363d;
-    padding: 22px;
-    border-radius: 16px;
-    margin-bottom: 22px;
-    box-shadow: 0px 3px 12px rgba(0,0,0,0.35);
+    background: white;
+    border-radius: 20px;
+    padding: 24px;
+    margin-bottom: 24px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+    transition: 0.2s ease;
 }
 
-/* Station Title */
+.station-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+
+/* ===== STATION TITLE ===== */
 .station-title {
-    font-size: 24px;
+    font-size: 26px;
     font-weight: 700;
-    color: #ffffff;
-    margin-bottom: 18px;
-    border-bottom: 1px solid #30363d;
-    padding-bottom: 10px;
+    color: #0f172a;
+    margin-bottom: 22px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #eff6ff;
 }
 
-/* Metric Boxes */
+/* ===== EQUIPMENT BOX ===== */
 .metric-box {
-    background: #0d1117;
-    border: 1px solid #30363d;
-    border-radius: 12px;
-    padding: 16px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 18px;
     text-align: center;
-    margin-bottom: 12px;
-    transition: 0.2s ease-in-out;
+    margin-bottom: 14px;
+    transition: all 0.2s ease;
 }
 
 .metric-box:hover {
-    border: 1px solid #58a6ff;
-    transform: translateY(-2px);
+    border-color: #3b82f6;
+    background: #eff6ff;
 }
 
-/* Metric Label */
+/* ===== EQUIPMENT LABEL ===== */
 .metric-label {
     font-size: 13px;
-    color: #94a3b8;
+    color: #64748b;
+    font-weight: 600;
     margin-bottom: 8px;
-    font-weight: 600;
 }
 
-/* Metric Value */
+/* ===== EQUIPMENT VALUE ===== */
 .metric-value {
-    font-size: 24px;
+    font-size: 28px;
     font-weight: 700;
-    color: #ffffff;
+    color: #0f172a;
 }
 
-/* Search Box */
+/* ===== INPUT BOX ===== */
 .stTextInput input {
-    background-color: #161b22 !important;
-    color: white !important;
-    border: 1px solid #30363d !important;
-    border-radius: 10px !important;
+    background-color: white !important;
+    color: #0f172a !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 12px !important;
+    padding: 0.65rem !important;
 }
 
-/* Buttons */
+.stTextInput input:focus {
+    border: 1px solid #2563eb !important;
+    box-shadow: 0 0 0 1px #2563eb !important;
+}
+
+/* ===== BUTTONS ===== */
 .stButton > button {
-    background-color: #21262d;
+    background: #2563eb;
     color: white;
-    border: 1px solid #30363d;
-    border-radius: 10px;
-    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 12px;
+    padding: 0.55rem 1rem;
     font-weight: 600;
+    transition: 0.2s ease;
 }
 
 .stButton > button:hover {
-    background-color: #30363d;
-    border: 1px solid #58a6ff;
-    color: #58a6ff;
+    background: #1d4ed8;
+    transform: translateY(-1px);
 }
 
-/* Metrics */
-[data-testid="metric-container"] {
-    background-color: #161b22;
-    border: 1px solid #30363d;
-    padding: 15px;
-    border-radius: 14px;
+/* ===== DIVIDER ===== */
+hr {
+    border-color: #e2e8f0;
 }
 
-/* Expander */
-.streamlit-expanderHeader {
-    background-color: #161b22;
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
     border-radius: 10px;
-    color: white;
 }
 
-/* Dataframe */
+/* ===== DATAFRAME ===== */
 [data-testid="stDataFrame"] {
-    border-radius: 12px;
+    border-radius: 14px;
     overflow: hidden;
 }
 
-/* Divider */
-hr {
-    border-color: #30363d;
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 768px) {
+
+    .header-box h1 {
+        font-size: 28px;
+    }
+
+    .station-title {
+        font-size: 22px;
+    }
+
+    .metric-value {
+        font-size: 22px;
+    }
 }
 
 </style>
