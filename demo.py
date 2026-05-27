@@ -14,44 +14,35 @@ st.set_page_config(
 st.markdown("""
 <style>
 
-/* ================= GLOBAL ================= */
-
-html, body, [class*="css"] {
-    font-family: 'Segoe UI', sans-serif;
-}
-
-/* ================= APP ================= */
+/* ================= MAIN APP ================= */
 
 .stApp {
+    background-color: #ffffff;
+    color: #000000;
+}
 
-    background-color: #eef2f7;
+/* ================= GLOBAL TEXT ================= */
 
-    color: #1e293b;
+html, body, [class*="css"]  {
+    color: #000000 !important;
+    font-family: "Segoe UI", sans-serif;
 }
 
 /* ================= MAIN CONTAINER ================= */
 
 .block-container {
-
     padding-top: 1rem;
-
     max-width: 1450px;
 }
 
 /* ================= SIDEBAR ================= */
 
 [data-testid="stSidebar"] {
-
-    background: linear-gradient(
-        180deg,
-        #0f172a 0%,
-        #1e293b 100%
-    );
+    background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
 }
 
 [data-testid="stSidebar"] * {
-
-    color: white;
+    color: white !important;
 }
 
 /* ================= HEADER ================= */
@@ -64,18 +55,18 @@ html, body, [class*="css"] {
         #1e3a8a
     );
 
-    padding: 32px;
+    padding: 30px;
 
     border-radius: 22px;
 
-    margin-bottom: 26px;
+    margin-bottom: 24px;
 
-    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
 }
 
 .header-box h1 {
 
-    color: white;
+    color: white !important;
 
     font-size: 38px;
 
@@ -86,23 +77,16 @@ html, body, [class*="css"] {
 
 .header-box h4 {
 
-    color: #dbeafe;
+    color: #dbeafe !important;
 
     font-weight: 400;
-}
-
-.small-text {
-
-    color: #cbd5e1;
-
-    font-size: 14px;
 }
 
 /* ================= TOP METRICS ================= */
 
 [data-testid="metric-container"] {
 
-    background: white !important;
+    background: #ffffff;
 
     border: 1px solid #dbe2ea;
 
@@ -117,7 +101,7 @@ html, body, [class*="css"] {
 
 .station-card {
 
-    background: white;
+    background: #ffffff;
 
     border: 1px solid #dbe2ea;
 
@@ -136,7 +120,7 @@ html, body, [class*="css"] {
 
     transform: translateY(-2px);
 
-    box-shadow: 0 8px 22px rgba(0,0,0,0.08);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
 }
 
 /* ================= STATION TITLE ================= */
@@ -147,7 +131,7 @@ html, body, [class*="css"] {
 
     font-weight: 700;
 
-    color: #0f172a;
+    color: #000000 !important;
 
     border-bottom: 1px solid #e2e8f0;
 
@@ -186,11 +170,11 @@ html, body, [class*="css"] {
 
 .metric-label {
 
-    color: #64748b;
+    color: #334155 !important;
 
     font-size: 13px;
 
-    font-weight: 600;
+    font-weight: 700;
 
     margin-bottom: 8px;
 }
@@ -199,33 +183,42 @@ html, body, [class*="css"] {
 
 .metric-value {
 
-    color: #0f172a;
+    color: #000000 !important;
 
     font-size: 28px;
 
-    font-weight: 700;
+    font-weight: 800;
 }
 
-/* ================= INPUT ================= */
+/* ================= SEARCH BOX ================= */
+
+.stTextInput label {
+
+    color: #000000 !important;
+
+    font-weight: 700 !important;
+
+    font-size: 16px !important;
+}
 
 .stTextInput input {
 
-    background-color: white !important;
+    background-color: #ffffff !important;
 
-    color: #0f172a !important;
+    color: #000000 !important;
 
     border: 1px solid #cbd5e1 !important;
 
     border-radius: 12px !important;
 
     padding: 0.7rem !important;
+
+    font-weight: 600;
 }
 
-.stTextInput input:focus {
+.stTextInput input::placeholder {
 
-    border-color: #2563eb !important;
-
-    box-shadow: 0 0 0 1px #2563eb !important;
+    color: #64748b !important;
 }
 
 /* ================= BUTTON ================= */
@@ -234,7 +227,7 @@ html, body, [class*="css"] {
 
     background: #2563eb;
 
-    color: white;
+    color: white !important;
 
     border: none;
 
@@ -242,7 +235,7 @@ html, body, [class*="css"] {
 
     padding: 0.55rem 1rem;
 
-    font-weight: 600;
+    font-weight: 700;
 
     transition: 0.2s ease;
 }
@@ -254,22 +247,20 @@ html, body, [class*="css"] {
     transform: translateY(-1px);
 }
 
-/* ================= STREAMLIT FIXES ================= */
+/* ================= METRIC TEXT ================= */
 
-section[data-testid="stSidebar"] div,
-label,
-p,
-span,
-div {
+[data-testid="metric-container"] label,
+[data-testid="metric-container"] div {
 
-    color: inherit;
+    color: #000000 !important;
+
+    font-weight: 700;
 }
 
-/* ================= HIDE STREAMLIT DEFAULT DARK EFFECTS ================= */
+/* ================= REMOVE DARK MODE EFFECT ================= */
 
 [data-testid="stAppViewContainer"] {
-
-    background: #eef2f7;
+    background: #ffffff !important;
 }
 
 /* ================= MOBILE ================= */
@@ -277,17 +268,14 @@ div {
 @media (max-width: 768px) {
 
     .header-box h1 {
-
         font-size: 28px;
     }
 
     .station-title {
-
         font-size: 22px;
     }
 
     .metric-value {
-
         font-size: 22px;
     }
 }
