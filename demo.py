@@ -12,179 +12,270 @@ st.set_page_config(
 )
 
 # ====================== CUSTOM CSS ======================
-# ====================== PROFESSIONAL UI CSS ======================
 st.markdown("""
 <style>
 
-/* ===== MAIN APP ===== */
+/* ================= ROOT VARIABLES ================= */
+
+:root {
+
+    --bg-color: #f3f6fb;
+    --card-bg: #ffffff;
+    --text-color: #0f172a;
+    --secondary-text: #64748b;
+    --border-color: #dbe2ea;
+
+    --sidebar-bg: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+    --header-bg: linear-gradient(135deg, #2563eb, #1e3a8a);
+
+    --metric-bg: #f8fafc;
+    --hover-bg: #eff6ff;
+
+    --button-bg: #2563eb;
+    --button-hover: #1d4ed8;
+
+    --shadow: 0 4px 14px rgba(0,0,0,0.06);
+}
+
+/* ================= DARK MODE ================= */
+
+@media (prefers-color-scheme: dark) {
+
+    :root {
+
+        --bg-color: #0e1117;
+        --card-bg: #161b22;
+        --text-color: #f1f5f9;
+        --secondary-text: #94a3b8;
+        --border-color: #2d3748;
+
+        --sidebar-bg: linear-gradient(180deg, #020617 0%, #111827 100%);
+        --header-bg: linear-gradient(135deg, #1e3a8a, #0f172a);
+
+        --metric-bg: #1e293b;
+        --hover-bg: #1d4ed8;
+
+        --button-bg: #2563eb;
+        --button-hover: #3b82f6;
+
+        --shadow: 0 6px 18px rgba(0,0,0,0.35);
+    }
+}
+
+/* ================= MAIN APP ================= */
+
 .stApp {
-    background-color: #f4f6f9;
-    color: #1e293b;
+    background-color: var(--bg-color);
+    color: var(--text-color);
 }
 
-/* ===== MAIN CONTAINER ===== */
+/* ================= CONTAINER ================= */
+
 .block-container {
-    padding-top: 1.2rem;
-    padding-bottom: 1rem;
-    max-width: 1400px;
+    padding-top: 1rem;
+    max-width: 1450px;
 }
 
-/* ===== SIDEBAR ===== */
+/* ================= SIDEBAR ================= */
+
 [data-testid="stSidebar"] {
-    background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
-    border-right: 1px solid #cbd5e1;
+    background: var(--sidebar-bg);
 }
 
 [data-testid="stSidebar"] * {
     color: white;
 }
 
-/* ===== HEADER ===== */
+/* ================= HEADER ================= */
+
 .header-box {
-    background: linear-gradient(135deg, #1d4ed8, #0f172a);
+
+    background: var(--header-bg);
     padding: 30px;
-    border-radius: 20px;
-    margin-bottom: 25px;
-    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
+    border-radius: 22px;
+
+    margin-bottom: 24px;
+
+    box-shadow: var(--shadow);
 }
 
 .header-box h1 {
     color: white;
-    margin-bottom: 8px;
     font-size: 38px;
     font-weight: 700;
+    margin-bottom: 8px;
 }
 
 .header-box h4 {
     color: #dbeafe;
-    margin-top: 0;
     font-weight: 400;
 }
 
 .small-text {
     color: #cbd5e1;
     font-size: 14px;
-    margin-top: 10px;
 }
 
-/* ===== TOP METRICS ===== */
+/* ================= METRICS ================= */
+
 [data-testid="metric-container"] {
-    background: white;
-    border: 1px solid #e2e8f0;
-    padding: 18px;
+
+    background: var(--card-bg);
+
+    border: 1px solid var(--border-color);
+
     border-radius: 18px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.04);
-}
 
-/* ===== STATION CARD ===== */
-.station-card {
-    background: white;
-    border-radius: 20px;
-    padding: 24px;
-    margin-bottom: 24px;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.05);
-    transition: 0.2s ease;
-}
-
-.station-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-}
-
-/* ===== STATION TITLE ===== */
-.station-title {
-    font-size: 26px;
-    font-weight: 700;
-    color: #0f172a;
-    margin-bottom: 22px;
-    padding-bottom: 12px;
-    border-bottom: 2px solid #eff6ff;
-}
-
-/* ===== EQUIPMENT BOX ===== */
-.metric-box {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 16px;
     padding: 18px;
-    text-align: center;
-    margin-bottom: 14px;
+
+    box-shadow: var(--shadow);
+}
+
+/* ================= STATION CARD ================= */
+
+.station-card {
+
+    background: var(--card-bg);
+
+    border: 1px solid var(--border-color);
+
+    border-radius: 22px;
+
+    padding: 24px;
+
+    margin-bottom: 24px;
+
+    box-shadow: var(--shadow);
+
     transition: all 0.2s ease;
 }
 
-.metric-box:hover {
-    border-color: #3b82f6;
-    background: #eff6ff;
+.station-card:hover {
+
+    transform: translateY(-2px);
+
+    box-shadow: 0 10px 24px rgba(0,0,0,0.12);
 }
 
-/* ===== EQUIPMENT LABEL ===== */
+/* ================= STATION TITLE ================= */
+
+.station-title {
+
+    font-size: 26px;
+
+    font-weight: 700;
+
+    color: var(--text-color);
+
+    border-bottom: 1px solid var(--border-color);
+
+    padding-bottom: 12px;
+
+    margin-bottom: 22px;
+}
+
+/* ================= EQUIPMENT BOX ================= */
+
+.metric-box {
+
+    background: var(--metric-bg);
+
+    border: 1px solid var(--border-color);
+
+    border-radius: 16px;
+
+    padding: 18px;
+
+    text-align: center;
+
+    margin-bottom: 14px;
+
+    transition: 0.2s ease;
+}
+
+.metric-box:hover {
+
+    background: var(--hover-bg);
+
+    border-color: #3b82f6;
+}
+
+/* ================= LABEL ================= */
+
 .metric-label {
+
+    color: var(--secondary-text);
+
     font-size: 13px;
-    color: #64748b;
+
     font-weight: 600;
+
     margin-bottom: 8px;
 }
 
-/* ===== EQUIPMENT VALUE ===== */
+/* ================= VALUE ================= */
+
 .metric-value {
+
+    color: var(--text-color);
+
     font-size: 28px;
+
     font-weight: 700;
-    color: #0f172a;
 }
 
-/* ===== INPUT BOX ===== */
+/* ================= INPUT ================= */
+
 .stTextInput input {
-    background-color: white !important;
-    color: #0f172a !important;
-    border: 1px solid #cbd5e1 !important;
+
+    background-color: var(--card-bg) !important;
+
+    color: var(--text-color) !important;
+
+    border: 1px solid var(--border-color) !important;
+
     border-radius: 12px !important;
-    padding: 0.65rem !important;
 }
 
 .stTextInput input:focus {
-    border: 1px solid #2563eb !important;
-    box-shadow: 0 0 0 1px #2563eb !important;
+
+    border: 1px solid #3b82f6 !important;
+
+    box-shadow: 0 0 0 1px #3b82f6 !important;
 }
 
-/* ===== BUTTONS ===== */
+/* ================= BUTTON ================= */
+
 .stButton > button {
-    background: #2563eb;
+
+    background: var(--button-bg);
+
     color: white;
+
     border: none;
+
     border-radius: 12px;
-    padding: 0.55rem 1rem;
+
     font-weight: 600;
+
     transition: 0.2s ease;
 }
 
 .stButton > button:hover {
-    background: #1d4ed8;
+
+    background: var(--button-hover);
+
     transform: translateY(-1px);
 }
 
-/* ===== DIVIDER ===== */
+/* ================= DIVIDER ================= */
+
 hr {
-    border-color: #e2e8f0;
+    border-color: var(--border-color);
 }
 
-/* ===== SCROLLBAR ===== */
-::-webkit-scrollbar {
-    width: 8px;
-}
+/* ================= MOBILE ================= */
 
-::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 10px;
-}
-
-/* ===== DATAFRAME ===== */
-[data-testid="stDataFrame"] {
-    border-radius: 14px;
-    overflow: hidden;
-}
-
-/* ===== MOBILE RESPONSIVE ===== */
 @media (max-width: 768px) {
 
     .header-box h1 {
