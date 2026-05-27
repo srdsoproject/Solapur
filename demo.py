@@ -12,74 +12,156 @@ st.set_page_config(
 )
 
 # ====================== CUSTOM CSS ======================
+# ====================== CUSTOM CSS ======================
 st.markdown("""
 <style>
 
-.main {
-    background-color: #f5f7fa;
+/* Main App Background */
+.stApp {
+    background-color: #0f1117;
+    color: #f1f5f9;
 }
 
+/* Main Container */
 .block-container {
     padding-top: 1rem;
     padding-bottom: 1rem;
 }
 
+/* Sidebar */
 [data-testid="stSidebar"] {
-    background-color: #0f172a;
+    background-color: #000000;
+    border-right: 1px solid #262730;
 }
 
 [data-testid="stSidebar"] * {
-    color: white;
+    color: #ffffff;
 }
 
-.station-card {
-    background: white;
-    padding: 20px;
-    border-radius: 14px;
-    border-left: 6px solid #2563eb;
-    margin-bottom: 18px;
-    box-shadow: 0px 2px 10px rgba(0,0,0,0.08);
-}
-
-.station-title {
-    font-size: 24px;
-    font-weight: 700;
-    color: #0f172a;
-    margin-bottom: 10px;
-}
-
-.metric-box {
-    background: #f8fafc;
-    padding: 12px;
-    border-radius: 10px;
-    text-align: center;
-    border: 1px solid #e2e8f0;
-    margin-bottom: 10px;
-}
-
-.metric-label {
-    font-size: 14px;
-    color: #64748b;
-    font-weight: 600;
-}
-
-.metric-value {
-    font-size: 22px;
-    font-weight: bold;
-    color: #111827;
-}
-
+/* Header */
 .header-box {
-    background: linear-gradient(90deg, #1d4ed8, #2563eb);
-    padding: 25px;
-    border-radius: 16px;
-    color: white;
+    background: linear-gradient(135deg, #000000, #1e293b);
+    padding: 28px;
+    border-radius: 18px;
     margin-bottom: 20px;
+    border: 1px solid #2d3748;
+    box-shadow: 0px 4px 14px rgba(0,0,0,0.4);
+}
+
+.header-box h1 {
+    color: #ffffff;
+    margin-bottom: 5px;
+}
+
+.header-box h4 {
+    color: #cbd5e1;
+    margin-top: 0;
 }
 
 .small-text {
-    color: #cbd5e1;
-    font-size: 14px;
+    color: #94a3b8;
+    font-size: 13px;
+}
+
+/* Station Card */
+.station-card {
+    background: #161b22;
+    border: 1px solid #30363d;
+    padding: 22px;
+    border-radius: 16px;
+    margin-bottom: 22px;
+    box-shadow: 0px 3px 12px rgba(0,0,0,0.35);
+}
+
+/* Station Title */
+.station-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 18px;
+    border-bottom: 1px solid #30363d;
+    padding-bottom: 10px;
+}
+
+/* Metric Boxes */
+.metric-box {
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    margin-bottom: 12px;
+    transition: 0.2s ease-in-out;
+}
+
+.metric-box:hover {
+    border: 1px solid #58a6ff;
+    transform: translateY(-2px);
+}
+
+/* Metric Label */
+.metric-label {
+    font-size: 13px;
+    color: #94a3b8;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+/* Metric Value */
+.metric-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+/* Search Box */
+.stTextInput input {
+    background-color: #161b22 !important;
+    color: white !important;
+    border: 1px solid #30363d !important;
+    border-radius: 10px !important;
+}
+
+/* Buttons */
+.stButton > button {
+    background-color: #21262d;
+    color: white;
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    padding: 0.5rem 1rem;
+    font-weight: 600;
+}
+
+.stButton > button:hover {
+    background-color: #30363d;
+    border: 1px solid #58a6ff;
+    color: #58a6ff;
+}
+
+/* Metrics */
+[data-testid="metric-container"] {
+    background-color: #161b22;
+    border: 1px solid #30363d;
+    padding: 15px;
+    border-radius: 14px;
+}
+
+/* Expander */
+.streamlit-expanderHeader {
+    background-color: #161b22;
+    border-radius: 10px;
+    color: white;
+}
+
+/* Dataframe */
+[data-testid="stDataFrame"] {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+/* Divider */
+hr {
+    border-color: #30363d;
 }
 
 </style>
