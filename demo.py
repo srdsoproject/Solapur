@@ -298,7 +298,7 @@ def login():
 
     with col2:
 
-        st.markdown("### Solapur Division Operating Portal")
+        st.markdown("### Solapur Division Inventory Portal")
 
         username = st.text_input("User ID")
         password = st.text_input("Password", type="password")
