@@ -49,13 +49,17 @@ html, body, [class*="css"] {
     animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-/* Sidebar Styling Override */
+/* FIXED: Sidebar Light Green Theme Styling Override */
 [data-testid="stSidebar"] {
-    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
-    box-shadow: 4px 0 15px rgba(0,0,0,0.08);
+    background: linear-gradient(180deg, #f0fdf4 0%, #dcfce7 100%);
+    box-shadow: 4px 0 15px rgba(0,0,0,0.04);
+    border-right: 1px solid #bbf7d0;
 }
-[data-testid="stSidebar"] * {
-    color: #f8fafc !important;
+[data-testid="stSidebar"] h3 {
+    color: #14532d !important;
+}
+[data-testid="stSidebar"] caption, [data-testid="stSidebar"] p, [data-testid="stSidebar"] span {
+    color: #166534 !important;
 }
 
 /* Enterprise Header Component */
@@ -173,7 +177,7 @@ html, body, [class*="css"] {
     background: #f8fafc;
 }
 
-/* FIXED: Unified Font Sizes for Label and Value */
+/* Unified Font Sizes for Label and Value */
 .metric-label {
     color: #334155 !important;
     font-size: 16px !important;
