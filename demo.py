@@ -27,6 +27,12 @@ st.markdown("""
     }
 }
 
+@keyframes statusPulse {
+    0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.2); }
+    70% { box-shadow: 0 0 0 6px rgba(37, 99, 235, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+}
+
 /* App Canvas Setup & Light Theme Reinforcement */
 .stApp {
     background-color: #f8fafc;
@@ -43,26 +49,13 @@ html, body, [class*="css"] {
     animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-/* Sidebar Styling Override - Enhanced Contrast Fix */
+/* Sidebar Styling Override */
 [data-testid="stSidebar"] {
     background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
     box-shadow: 4px 0 15px rgba(0,0,0,0.08);
 }
-[data-testid="stSidebar"] h1, 
-[data-testid="stSidebar"] h2, 
-[data-testid="stSidebar"] h3, 
-[data-testid="stSidebar"] h4, 
-[data-testid="stSidebar"] h5, 
-[data-testid="stSidebar"] h6,
-[data-testid="stSidebar"] p,
-[data-testid="stSidebar"] label,
-[data-testid="stSidebar"] span,
-[data-testid="stSidebar"] div {
-    color: #ffffff !important;
-}
-[data-testid="stSidebar"] caption,
-[data-testid="stSidebar"] .stMarkdown p {
-    color: #94a3b8 !important;
+[data-testid="stSidebar"] * {
+    color: #f8fafc !important;
 }
 
 /* Enterprise Header Component */
@@ -136,40 +129,14 @@ html, body, [class*="css"] {
 .rail-station-wrapper:hover {
     border-color: #cbd5e1;
 }
-
-/* Context-Driven Strip Colors */
 .station-title-strip {
     font-size: 20px;
     font-weight: 700;
+    color: #1e3a8a !important;
     border-bottom: 2px solid #f1f5f9;
     padding-bottom: 10px;
     margin-bottom: 18px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
 }
-.strip-station {
-    color: #1e3a8a !important;
-}
-.strip-junction {
-    color: #047857 !important; /* Elegant Emerald Green */
-}
-.strip-cabin {
-    color: #b45309 !important; /* Safety Amber/Orange */
-}
-
-.type-badge {
-    font-size: 11px;
-    text-transform: uppercase;
-    padding: 3px 8px;
-    border-radius: 4px;
-    font-weight: 800;
-    letter-spacing: 0.5px;
-    margin-left: 10px;
-}
-.badge-station { background-color: #eff6ff; color: #1e40af; }
-.badge-junction { background-color: #ecfdf5; color: #065f46; }
-.badge-cabin { background-color: #fffbeb; color: #92400e; }
 
 /* Interactive Dynamic Grid Elements */
 .metric-box {
@@ -315,10 +282,10 @@ def main_portal():
 
     # --- Sidebar Console Operations ---
     st.sidebar.markdown("### 🖥️ Controller Desk")
-    st.sidebar.caption("System Status: Secure Connection")
+    st.sidebar.caption("Security Context: Authenticated")
     st.sidebar.write("")
     
-    if st.sidebar.button("🔄 Clear Cache & Sync Data", use_container_width=True):
+    if st.sidebar.button("🔄 Clear System Cache & Sync", use_container_width=True):
         load_google_sheet.clear()
         st.rerun()
         
@@ -384,7 +351,7 @@ def main_portal():
     with search_col:
         search = st.text_input(
             "🔍 Operational Node Filter Engine",
-            placeholder="Search matching station names, junctions, or cabins..."
+            placeholder="Search matching station names or cabins..."
         )
     
     filtered_df = df.copy()
@@ -409,28 +376,12 @@ def main_portal():
 
     # --- Station Grid Loops ---
     for _, row in filtered_df.iterrows():
-        station_name = str(row.get("STATION", "Unknown Base Point"))
-        station_upper = station_name.upper()
-        
-        # Determine node operational classification type matching
-        if "JN" in station_upper or "JUNCTION" in station_upper:
-            strip_class = "strip-junction"
-            badge_text = "Junction"
-            badge_class = "badge-junction"
-        elif "CABIN" in station_upper:
-            strip_class = "strip-cabin"
-            badge_text = "Cabin"
-            badge_class = "badge-cabin"
-        else:
-            strip_class = "strip-station"
-            badge_text = "Station"
-            badge_class = "badge-station"
+        station_name = row.get("STATION", "Unknown Base Station")
         
         st.markdown(f"""
         <div class="rail-station-wrapper">
-            <div class="station-title-strip {strip_class}">
-                🚉 Node context: <b>{station_name}</b> 
-                <span class="type-badge {badge_class}">{badge_text}</span>
+            <div class="station-title-strip">
+                🚉 Station / Node context: <b>{station_name}</b>
             </div>
         """, unsafe_allow_html=True)
         
