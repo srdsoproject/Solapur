@@ -7,7 +7,7 @@ from streamlit_folium import st_folium
 
 # ====================== PAGE CONFIG ======================
 st.set_page_config(
-    page_title="Solapur Division Equipment Inventory Management System",
+    page_title="Solapur Division Equipment & Infrastructure Management System",
     page_icon="🚉",
     layout="wide"
 )
@@ -17,17 +17,10 @@ st.markdown("""
 <style>
 /* Smooth Viewport Entrance Animations */
 @keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(12px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-/* Dynamic Glow Keyframes for Safety Flags */
 @keyframes glowGreen {
     0% { box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08), 0 0 0 0 rgba(34, 197, 94, 0.4); }
     50% { box-shadow: 0 6px 20px rgba(34, 197, 94, 0.35), 0 0 14px 4px rgba(34, 197, 94, 0.2); }
@@ -40,7 +33,7 @@ st.markdown("""
     100% { box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08), 0 0 0 0 rgba(239, 68, 68, 0); }
 }
 
-/* App Canvas Setup & Light Theme Reinforcement */
+/* App Canvas Setup & Theme Reinforcement */
 .stApp {
     background-color: #f8fafc;
     color: #0f172a;
@@ -62,11 +55,16 @@ html, body, [class*="css"] {
     box-shadow: 4px 0 15px rgba(0,0,0,0.04);
     border-right: 1px solid #bbf7d0;
 }
-[data-testid="stSidebar"] h3 {
-    color: #14532d !important;
-}
+[data-testid="stSidebar"] h3 { color: #14532d !important; }
 [data-testid="stSidebar"] caption, [data-testid="stSidebar"] p, [data-testid="stSidebar"] span {
     color: #166534 !important;
+}
+
+/* Tab Component Styling Overrides */
+button[data-baseweb="tab"] {
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    padding: 12px 24px !important;
 }
 
 /* Enterprise Header Component */
@@ -79,13 +77,6 @@ html, body, [class*="css"] {
     border-left: 6px solid #38bdf8;
     position: relative;
     overflow: hidden;
-}
-.header-box::before {
-    content: '';
-    position: absolute;
-    top: 0; right: 0; bottom: 0; left: 0;
-    background: linear-gradient(45deg, transparent 60%, rgba(255,255,255,0.06) 100%);
-    pointer-events: none;
 }
 .header-box h1 {
     color: #ffffff !important;
@@ -101,33 +92,7 @@ html, body, [class*="css"] {
     letter-spacing: 0.2px;
 }
 
-/* Native Metrics Override */
-[data-testid="metric-container"] {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
-    padding: 18px 24px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-[data-testid="metric-container"]:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
-}
-[data-testid="metric-container"] label {
-    color: #475569 !important;
-    font-size: 13px !important;
-    font-weight: 600 !important;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-}
-[data-testid="metric-container"] div[data-testid="stMetricValue"] {
-    color: #1e3a8a !important;
-    font-size: 30px !important;
-    font-weight: 800 !important;
-}
-
-/* Station Structural Wrapper Card */
+/* Structural Wrapper Card */
 .rail-station-wrapper {
     background: #ffffff;
     border: 1px solid #e2e8f0;
@@ -164,46 +129,29 @@ html, body, [class*="css"] {
     align-items: center;
     gap: 6px;
 }
-.metric-box.active-assets {
-    border-top: 4px solid #2563eb;
-    background: #f8fafc;
-}
-.metric-box.active-assets:hover {
-    transform: scale(1.03);
-    background: #eff6ff;
-    border-top-color: #1d4ed8;
-}
+.metric-box.active-assets { border-top: 4px solid #2563eb; background: #f8fafc; }
+.metric-box.active-assets:hover { transform: scale(1.03); background: #eff6ff; border-top-color: #1d4ed8; }
 
-/* Flag Glowing Specific Assignments (Overriding standard active states conditionally) */
+/* Infrastructure layout specific card styling variant */
+.metric-box.infra-asset { border-top: 4px solid #0284c7; background: #f0f9ff; }
+.metric-box.infra-asset:hover { transform: scale(1.03); background: #e0f2fe; border-top-color: #0369a1; }
+
 .metric-box.flag-green-glow {
     border-top: 4px solid #22c55e !important;
     background: #f0fdf4 !important;
     animation: glowGreen 2.5s infinite ease-in-out;
 }
-.metric-box.flag-green-glow:hover {
-    transform: scale(1.03);
-    background: #f0fdf4 !important;
-}
+.metric-box.flag-green-glow:hover { transform: scale(1.03); background: #f0fdf4 !important; }
 
 .metric-box.flag-red-glow {
     border-top: 4px solid #ef4444 !important;
     background: #fef2f2 !important;
     animation: glowRed 2.5s infinite ease-in-out;
 }
-.metric-box.flag-red-glow:hover {
-    transform: scale(1.03);
-    background: #fef2f2 !important;
-}
+.metric-box.flag-red-glow:hover { transform: scale(1.03); background: #fef2f2 !important; }
 
-.metric-box.zero-assets {
-    border-top: 4px solid #94a3b8;
-    background: #ffffff;
-    opacity: 0.75;
-}
-.metric-box.zero-assets:hover {
-    opacity: 1.0;
-    background: #f8fafc;
-}
+.metric-box.zero-assets { border-top: 4px solid #94a3b8; background: #ffffff; opacity: 0.75; }
+.metric-box.zero-assets:hover { opacity: 1.0; background: #f8fafc; }
 
 /* Unified Font Sizes for Label and Value */
 .metric-label {
@@ -218,16 +166,8 @@ html, body, [class*="css"] {
     align-items: center;
     justify-content: center;
 }
-.metric-value {
-    color: #1e3a8a !important;
-    font-size: 18px !important;
-    font-weight: 700 !important;
-    margin: 0;
-}
-.metric-value.zero {
-    color: #94a3b8 !important;
-    font-weight: 600;
-}
+.metric-value { color: #1e3a8a !important; font-size: 18px !important; font-weight: 700 !important; margin: 0; }
+.metric-value.zero { color: #94a3b8 !important; font-weight: 600; }
 
 /* Form Panel Adjustments */
 .stButton > button {
@@ -242,18 +182,16 @@ html, body, [class*="css"] {
 def login():
     if "authenticated" not in st.session_state:
         st.session_state.authenticated = False
-
     if st.session_state.authenticated:
         return True
 
     col1, col2, col3 = st.columns([1, 1.6, 1])
     with col2:
         st.write("")
-        st.write("")
         st.markdown("""
         <div style="background: white; padding: 35px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.04); border: 1px solid #e2e8f0; text-align: center;">
             <h2 style="margin: 0 0 5px 0; color: #1e3a8a; font-weight:800;">🚉 Solapur Division</h2>
-            <p style="color: #64748b; margin: 0 0 5px 0; font-size:14px; font-weight:500;">Safety Branch - Equipment Asset Tracking Portal</p>
+            <p style="color: #64748b; margin: 0; font-size:14px; font-weight:500;">Safety & Engineering Branch Asset Tracking Portal</p>
         </div>
         """, unsafe_allow_html=True)
         
@@ -261,12 +199,10 @@ def login():
             username = st.text_input("Operator User ID")
             password = st.text_input("Security Access Password", type="password")
             submit = st.form_submit_button("Secure Log In", use_container_width=True)
-            
             if submit:
                 try:
                     if username == st.secrets["APP_USERNAME"] and password == st.secrets["APP_PASSWORD"]:
                         st.session_state.authenticated = True
-                        st.success("Authorization confirmed.")
                         st.rerun()
                     else:
                         st.error("❌ Invalid User ID or Password credential.")
@@ -277,190 +213,182 @@ def login():
 if not login():
     st.stop()
 
-# ====================== DATA PIPELINE ======================
-SHEET_ID = st.secrets["SHEET_ID"]
-SHEET_NAME = st.secrets["SHEET_NAME"]
-
+# ====================== DATA PIPELINE ENGINE ======================
 @st.cache_data(ttl=300)
-def load_google_sheet():
+def load_secure_sheet(sheet_id_key, sheet_name_key):
     try:
+        sheet_id = st.secrets[sheet_id_key]
+        sheet_name = st.secrets[sheet_name_key]
         creds = Credentials.from_service_account_info(
             st.secrets["gcp_service_account"],
-            scopes=[
-                "https://www.googleapis.com/auth/spreadsheets",
-                "https://www.googleapis.com/auth/drive"
-            ]
+            scopes=["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
         )
         gc = gspread.authorize(creds)
-        sh = gc.open_by_key(SHEET_ID)
-        worksheet = sh.worksheet(SHEET_NAME)
-        data = worksheet.get_all_records()
-        
-        df = pd.DataFrame(data)
+        sh = gc.open_by_key(sheet_id)
+        worksheet = sh.worksheet(sheet_name)
+        df = pd.DataFrame(worksheet.get_all_records())
         df.columns = df.columns.str.strip()
         return df
     except Exception as e:
-        st.error("🚨 Interface Pipeline Error: Connection to secure cloud asset data matrix rejected.")
-        st.exception(e)
+        st.error(f"🚨 Connection to Cloud Target matrix rejected for config mapping keys.")
         return pd.DataFrame()
 
-# ====================== MAIN PORTAL APPLICATION ======================
+# ====================== APPLICATION MAIN CORE ======================
 def main_portal():
-    df = load_google_sheet()
-    
-    if df.empty:
-        st.warning("⚠️ Connected to repository data frame, but no asset rows found inside target sheet.")
-        return
-
     # --- Header Banner Component ---
-    st.markdown(f"""
+    st.markdown("""
     <div class="header-box">
-        <h1>🚉 Solapur Division Equipment Inventory Management System</h1>
-        <h4>An initiative by Safety Branch, Solapur Division, Central Railway</h4>
+        <h1>🚉 Solapur Division Infrastructure Management Dashboard</h1>
+        <h4>Safety & Engineering Branch Operations Matrix — Central Railway</h4>
     </div>
     """, unsafe_allow_html=True)
 
     # --- Sidebar Console Operations ---
     st.sidebar.markdown("### 🖥️ Controller Desk")
-    st.sidebar.caption("Security Context: Authenticated")
-    st.sidebar.write("")
+    st.sidebar.caption("Security Status: Connected")
     
-    if st.sidebar.button("🔄 Clear System Cache & Sync", use_container_width=True):
-        load_google_sheet.clear()
+    if st.sidebar.button("🔄 Sync Global Sheets & Clear Cache", use_container_width=True):
+        load_secure_sheet.clear()
         st.rerun()
-        
-    if st.sidebar.button("🚪 Terminate Session (Logout)", use_container_width=True):
+    if st.sidebar.button("🚪 Terminate Session", use_container_width=True):
         st.session_state.authenticated = False
         st.rerun()
 
-    # --- Calculations & Dynamic KPI Summary Section ---
-    total_stations = len(df)
-    exclude_cols = ["STATION", "LATITUDE", "LONGITUDE"]
-    equipment_columns = [col for col in df.columns if col not in exclude_cols]
-    
-    numeric_df = df[equipment_columns].apply(pd.to_numeric, errors='coerce').fillna(0)
-    aggregate_physical_assets = int(numeric_df.sum().sum())
+    # ====================== TABS ROUTER SETUP ======================
+    tab1, tab2 = st.tabs(["📦 Equipment Inventory Matrix", "🛤️ Track Crossing Layouts"])
 
-    m_col1, m_col2, m_col3 = st.columns(3)
-    with m_col1:
-        st.metric("🚏 Active Monitored Nodes", f"{total_stations} Locations")
-    with m_col2:
-        st.metric("🛠 Categorized Equipment Lines", f"{len(equipment_columns)} Asset Types")
-    with m_col3:
-        st.metric("📦 Gross Physical Units Deployed", f"{aggregate_physical_assets:,} Elements")
-
-    st.write("")
-
-    # --- GIS Map Integration Panel ---
-    if "LATITUDE" in df.columns and "LONGITUDE" in df.columns:
-        with st.expander("🗺️ Division GIS Spatial Mapping Overview", expanded=True):
-            map_lat = pd.to_numeric(df["LATITUDE"], errors='coerce').dropna().mean()
-            map_lon = pd.to_numeric(df["LONGITUDE"], errors='coerce').dropna().mean()
+    # ---------------------------------------------------------------
+    # TAB 1 (tab1): EQUIPMENT INVENTORY PORTAL
+    # ---------------------------------------------------------------
+    with tab1:
+        df_eq = load_secure_sheet("SHEET_ID", "SHEET_NAME")
+        if df_eq.empty:
+            st.warning("⚠️ No active rows found inside Equipment Inventory database.")
+        else:
+            exclude_cols = ["STATION", "LATITUDE", "LONGITUDE"]
+            equipment_columns = [col for col in df_eq.columns if col not in exclude_cols]
             
-            if not pd.isna(map_lat) and not pd.isna(map_lon):
-                m = folium.Map(location=[map_lat, map_lon], zoom_start=8, tiles="OpenStreetMap")
-                
-                for _, row in df.iterrows():
+            # Summary KPI Cards
+            kpi_col1, kpi_col2, kpi_col3 = st.columns(3)
+            num_df = df_eq[equipment_columns].apply(pd.to_numeric, errors='coerce').fillna(0)
+            with kpi_col1: st.metric("🚏 Active Stations", f"{len(df_eq)} Locations")
+            with kpi_col2: st.metric("🛠️ Categorized Asset Classes", f"{len(equipment_columns)} Types")
+            with kpi_col3: st.metric("📦 Gross Physical Units", f"{int(num_df.sum().sum()):,} Elements")
+            
+            st.write("")
+            
+            # GIS Engine Map
+            if "LATITUDE" in df_eq.columns and "LONGITUDE" in df_eq.columns:
+                with st.expander("🗺️ Division GIS Spatial Mapping Overview", expanded=False):
+                    map_lat = pd.to_numeric(df_eq["LATITUDE"], errors='coerce').dropna().mean()
+                    map_lon = pd.to_numeric(df_eq["LONGITUDE"], errors='coerce').dropna().mean()
+                    if not (pd.isna(map_lat) or pd.isna(map_lon)):
+                        m = folium.Map(location=[map_lat, map_lon], zoom_start=8, tiles="OpenStreetMap")
+                        for _, row in df_eq.iterrows():
+                            try:
+                                lat, lon = float(row["LATITUDE"]), float(row["LONGITUDE"])
+                                if not (pd.isna(lat) or pd.isna(lon)):
+                                    folium.Marker(
+                                        [lat, lon],
+                                        tooltip=f"Node: {row.get('STATION', 'Unknown')}",
+                                        icon=folium.Icon(color="blue", icon="train", prefix="fa")
+                                    ).add_to(m)
+                            except: continue
+                        st_folium(m, width="100%", height=320, returned_objects=[])
+
+            # Filter Search
+            search_eq = st.text_input("🔍 Operational Node Filter Engine", placeholder="Search stations or cabins...", key="search_eq")
+            fil_df_eq = df_eq[df_eq["STATION"].astype(str).str.contains(search_eq, case=False, na=False)] if search_eq else df_eq
+
+            # Grid View
+            for _, row in fil_df_eq.iterrows():
+                st.markdown(f'<div class="rail-station-wrapper"><div class="station-title-strip">🚉 Node: <b>{row.get("STATION", "Unknown")}</b></div>', unsafe_allow_html=True)
+                cols = st.columns(4)
+                for idx, col in enumerate(equipment_columns):
                     try:
-                        lat = float(row["LATITUDE"])
-                        lon = float(row["LONGITUDE"])
-                        if not (pd.isna(lat) or pd.isna(lon)):
-                            station_title = row.get("STATION", "Unknown Node")
-                            
-                            html_popup = f"""
-                            <div style='font-family:sans-serif; min-width:150px;'>
-                                <h5 style='margin:0 0 4px 0; color:#1e3a8a;'>🚉 {station_title}</h5>
-                                <div style='border-bottom:1px solid #e2e8f0; margin-bottom:6px;'></div>
-                                <span style='font-size:11px; color:#475569;'>Equipment Classes tracked here: <b>{len(equipment_columns)}</b></span>
-                            </div>
-                            """
-                            folium.Marker(
-                                [lat, lon],
-                                popup=folium.Popup(html_popup, max_width=250),
-                                tooltip=f"Node: {station_title}",
-                                icon=folium.Icon(color="blue", icon="train", prefix="fa")
-                            ).add_to(m)
-                    except (ValueError, TypeError):
-                        continue
-                st_folium(m, width="100%", height=360, returned_objects=[])
-            else:
-                st.info("💡 GIS Visual Map skipped: Target coordinates evaluate to Null/NaN.")
+                        raw = row.get(col, 0)
+                        val = int(float(raw)) if raw != "" and not pd.isna(raw) else 0
+                    except: val = raw
+                    
+                    box_style = "zero-assets" if val == 0 else "active-assets"
+                    val_style = "zero" if val == 0 else "active"
+                    
+                    if val != 0:
+                        col_clean = col.lower()
+                        if "green" in col_clean and "flag" in col_clean: box_style += " flag-green-glow"
+                        elif "red" in col_clean and "flag" in col_clean: box_style += " flag-red-glow"
+                    
+                    with cols[idx % 4]:
+                        st.markdown(f'<div class="metric-box {box_style}"><div class="metric-label">{col}</div><div class="metric-value {val_style}">{val}</div></div>', unsafe_allow_html=True)
+                st.markdown("</div>", unsafe_allow_html=True)
 
-    # --- Search Filter & Export Configuration Engine ---
-    search_col, export_col = st.columns([3, 1])
-    with search_col:
-        search = st.text_input(
-            "🔍 Operational Node Filter Engine",
-            placeholder="Search matching station names or cabins..."
-        )
-    
-    filtered_df = df.copy()
-    if search:
-        filtered_df = df[df["STATION"].astype(str).str.contains(search, case=False, na=False)]
-
-    with export_col:
-        st.write("")
-        st.write("")
-        csv_payload = filtered_df.to_csv(index=False).encode('utf-8')
-        st.download_button(
-            label="📥 Export Filtered Report (.CSV)",
-            data=csv_payload,
-            file_name=f"CR_Solapur_Safety_Audit_{pd.Timestamp.now().strftime('%Y%m%d')}.csv",
-            mime="text/csv",
-            use_container_width=True
-        )
-
-    if filtered_df.empty:
-        st.info("ℹ️ No active railway infrastructure records match the current filter query.")
-        return
-
-    # --- Station Grid Loops ---
-    for _, row in filtered_df.iterrows():
-        station_name = row.get("STATION", "Unknown Base Station")
+    # ---------------------------------------------------------------
+    # TAB 2 (tab2): NEW TRACK CROSSINGS LAYOUT PORTAL (MIRRORED DESIGN)
+    # ---------------------------------------------------------------
+    with tab2:
+        df_tr = load_secure_sheet("NEW_SHEET_ID", "NEW_SHEET_NAME")
         
-        st.markdown(f"""
-        <div class="rail-station-wrapper">
-            <div class="station-title-strip">
-                🚉 Station / Node context: <b>{station_name}</b>
-            </div>
-        """, unsafe_allow_html=True)
-        
-        cols = st.columns(4)
-        for i, col in enumerate(equipment_columns):
-            raw_val = row.get(col, 0)
+        if df_tr.empty:
+            st.warning("⚠️ No active infrastructure data row elements found inside target crossing layout sheet.")
+        else:
+            # Main identifiers used to formulate the strip headers
+            header_identifiers = ["PXING NO.", "OPERATING STATION"]
+            # Dynamically identify all detail columns (including added or modified headers automatically)
+            detail_columns = [col for col in df_tr.columns if col not in header_identifiers]
             
-            try:
-                if raw_val == "" or pd.isna(raw_val):
-                    value = 0
-                else:
-                    value = int(float(raw_val))
-            except (ValueError, TypeError):
-                value = raw_val
-            
-            # 1. Evaluate baseline class style (Zero assets vs Active assets)
-            if value == 0:
-                box_style = "zero-assets"
-                val_style = "zero"
-            else:
-                box_style = "active-assets"
-                val_style = "active"
+            # Summary KPIs (Matched layout style)
+            kpi_t1, kpi_t2, kpi_t3 = st.columns(3)
+            with kpi_t1: st.metric("🛤️ Registered Infrastructure Nodes", f"{len(df_tr)} Crossings")
+            with kpi_t2: 
+                uniq_st = len(df_tr["OPERATING STATION"].dropna().unique()) if "OPERATING STATION" in df_tr.columns else 0
+                st.metric("🚉 Controlled Operations Stations", f"{uniq_st} Main Hubs")
+            with kpi_t3: 
+                line_types = len(df_tr["LINE TYPE"].dropna().unique()) if "LINE TYPE" in df_tr.columns else 0
+                st.metric("🛣️ Active Running Configurations", f"{line_types} Track Lines")
                 
-                # 2. FIXED: Inject customized glowing animations specifically for flag types
-                col_clean = col.lower()
-                if "green" in col_clean and "flag" in col_clean:
-                    box_style += " flag-green-glow"
-                elif "red" in col_clean and "flag" in col_clean:
-                    box_style += " flag-red-glow"
+            st.write("")
             
-            with cols[i % 4]:
+            # Filter & Search Engine UI
+            search_tr = st.text_input("🔍 Infrastructure Attribute Search Desk", placeholder="Filter by station, crossing number, jurisdiction...", key="search_tr")
+            
+            fil_df_tr = df_tr.copy()
+            if search_tr:
+                # Runs search filtration across all available table dimensions safely
+                combined_mask = fil_df_tr.astype(str).apply(lambda row: row.str.contains(search_tr, case=False).any(), axis=1)
+                fil_df_tr = fil_df_tr[combined_mask]
+
+            # Mirrored Layout Cards Generation Loop
+            for _, row in fil_df_tr.iterrows():
+                pxing = row.get("PXING NO.", "N/A")
+                station = row.get("OPERATING STATION", "Unknown Hub")
+                
+                # Dynamic Wrapper block header (Identical styling pattern)
                 st.markdown(f"""
-                <div class="metric-box {box_style}">
-                    <div class="metric-label">{col}</div>
-                    <div class="metric-value {val_style}">{value}</div>
-                </div>
+                <div class="rail-station-wrapper">
+                    <div class="station-title-strip">
+                        🛤️ Crossing Index: <b>{pxing}</b> &nbsp;|&nbsp; Station Context: <b>{station}</b>
+                    </div>
                 """, unsafe_allow_html=True)
                 
-        st.markdown("</div>", unsafe_allow_html=True)
+                # Split row metadata cards into 4-column dynamic grid
+                cols_tr = st.columns(4)
+                for idx, col in enumerate(detail_columns):
+                    val = row.get(col, "")
+                    if val == "" or pd.isna(val):
+                        val = "N/A"
+                    
+                    # Renders using the elegant corporate sky-blue styling card configuration
+                    box_style = "infra-asset"
+                    
+                    with cols_tr[idx % 4]:
+                        st.markdown(f"""
+                        <div class="metric-box {box_style}">
+                            <div class="metric-label">{col}</div>
+                            <div class="metric-value">{val}</div>
+                        </div>
+                        """, unsafe_allow_html=True)
+                        
+                st.markdown("</div>", unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main_portal()
