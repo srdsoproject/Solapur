@@ -143,10 +143,15 @@ html, body, [class*="css"] {
     background: #ffffff;
     border: 1px solid #e2e8f0;
     border-radius: 8px;
-    padding: 14px;
+    padding: 16px 14px;
     text-align: center;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
 }
 .metric-box.active-assets {
     border-top: 4px solid #2563eb;
@@ -167,22 +172,25 @@ html, body, [class*="css"] {
     opacity: 1.0;
     background: #f8fafc;
 }
+
+/* FIXED: Unified Font Sizes for Label and Value */
 .metric-label {
-    color: #64748b !important;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 8px;
-    min-height: 32px;
+    color: #334155 !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    text-transform: capitalize;
+    letter-spacing: 0.2px;
+    line-height: 1.3;
+    margin: 0;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 .metric-value {
-    color: #0f172a !important;
-    font-size: 26px;
-    font-weight: 800;
+    color: #1e3a8a !important;
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    margin: 0;
 }
 .metric-value.zero {
     color: #94a3b8 !important;
