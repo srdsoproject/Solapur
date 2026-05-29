@@ -214,7 +214,7 @@ if not login():
     st.stop()
 
 # ====================== DATA PIPELINE ENGINE ======================
-@st.cache_data(ttl=0)
+@st.cache_data(ttl=300)
 def load_secure_sheet(sheet_id_key, sheet_name_key):
     try:
         sheet_id = st.secrets[sheet_id_key]
