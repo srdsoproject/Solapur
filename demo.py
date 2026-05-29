@@ -214,7 +214,7 @@ if not login():
     st.stop()
 
 # ====================== DATA PIPELINE ENGINE ======================
-@st.cache_data(ttl=300)
+@st.cache_data(ttl=300, show_spinner="Fetching Data Matrix...")
 def load_secure_sheet(sheet_id_key, sheet_name_key):
     try:
         sheet_id = st.secrets[sheet_id_key]
@@ -230,7 +230,7 @@ def load_secure_sheet(sheet_id_key, sheet_name_key):
         df.columns = df.columns.str.strip()
         return df
     except Exception as e:
-        st.error(f"🚨 Connection to Cloud Target matrix rejected for config mapping keys.")
+        st.error(f"🚨 Connection to Cloud Target matrix rejected.")
         return pd.DataFrame()
 
 # ====================== APPLICATION MAIN CORE ======================
@@ -277,14 +277,15 @@ def main_portal():
             
             st.write("")
             
-            # GIS Engine Map
+            # GIS Engine Map (With explicit session handling key)
             if "LATITUDE" in df_eq.columns and "LONGITUDE" in df_eq.columns:
                 with st.expander("🗺️ Division GIS Spatial Mapping Overview", expanded=False):
                     map_lat = pd.to_numeric(df_eq["LATITUDE"], errors='coerce').dropna().mean()
                     map_lon = pd.to_numeric(df_eq["LONGITUDE"], errors='coerce').dropna().mean()
                     if not (pd.isna(map_lat) or pd.isna(map_lon)):
                         m = folium.Map(location=[map_lat, map_lon], zoom_start=8, tiles="OpenStreetMap")
-                        for _, row in df_eq.iterrows():
+                        # Add a limit to markers if map lags
+                        for _, row in df_eq.head(40).iterrows():
                             try:
                                 lat, lon = float(row["LATITUDE"]), float(row["LONGITUDE"])
                                 if not (pd.isna(lat) or pd.isna(lon)):
@@ -294,14 +295,24 @@ def main_portal():
                                         icon=folium.Icon(color="blue", icon="train", prefix="fa")
                                     ).add_to(m)
                             except: continue
-                        st_folium(m, width="100%", height=320, returned_objects=[])
+                        st_folium(m, width="100%", height=320, key="global_gis_map", returned_objects=[])
 
             # Filter Search
-            search_eq = st.text_input("🔍 Operational Node Filter Engine", placeholder="Search stations or cabins...", key="search_eq")
+            search_eq = st.text_input("🔍 Operational Node Filter Engine", placeholder="Type station name...", key="search_eq")
             fil_df_eq = df_eq[df_eq["STATION"].astype(str).str.contains(search_eq, case=False, na=False)] if search_eq else df_eq
 
-            # Grid View
-            for _, row in fil_df_eq.iterrows():
+            # PAGINATION ENGINE FOR TAB 1 (Prevents DOM hanging)
+            max_cards = 15
+            total_filtered_eq = len(fil_df_eq)
+            
+            if total_filtered_eq > max_cards:
+                st.info(f"💡 Showing first {max_cards} of {total_filtered_eq} locations. Use search above to find specific stations.")
+                display_df_eq = fil_df_eq.head(max_cards)
+            else:
+                display_df_eq = fil_df_eq
+
+            # Optimized Grid View Render
+            for _, row in display_df_eq.iterrows():
                 st.markdown(f'<div class="rail-station-wrapper"><div class="station-title-strip">🚉 Node: <b>{row.get("STATION", "Unknown")}</b></div>', unsafe_allow_html=True)
                 cols = st.columns(4)
                 for idx, col in enumerate(equipment_columns):
@@ -323,66 +334,73 @@ def main_portal():
                 st.markdown("</div>", unsafe_allow_html=True)
 
     # ---------------------------------------------------------------
-    # TAB 2 (tab2): NEW TRACK CROSSINGS LAYOUT PORTAL (MIRRORED DESIGN)
+    # TAB 2 (tab2): NEW TRACK CROSSINGS LAYOUT PORTAL (OPTIMIZED)
     # ---------------------------------------------------------------
     with tab2:
         df_tr = load_secure_sheet("NEW_SHEET_ID", "NEW_SHEET_NAME")
         
         if df_tr.empty:
-            st.warning("⚠️ No active infrastructure data row elements found inside target crossing layout sheet.")
+            st.warning("⚠️ No active infrastructure data elements found.")
         else:
-            # Main identifiers used to formulate the strip headers
             header_identifiers = ["PXING NO.", "OPERATING STATION"]
-            # Dynamically identify all detail columns (including added or modified headers automatically)
             detail_columns = [col for col in df_tr.columns if col not in header_identifiers]
             
-            # Summary KPIs (Matched layout style)
+            # Summary KPIs
             kpi_t1, kpi_t2, kpi_t3 = st.columns(3)
-            with kpi_t1: st.metric("🛤️ Registered Infrastructure Nodes", f"{len(df_tr)} Crossings")
+            with kpi_t1: st.metric("🛤️ Infrastructure Nodes", f"{len(df_tr)} Crossings")
             with kpi_t2: 
                 uniq_st = len(df_tr["OPERATING STATION"].dropna().unique()) if "OPERATING STATION" in df_tr.columns else 0
-                st.metric("🚉 Controlled Operations Stations", f"{uniq_st} Main Hubs")
+                st.metric(" Controlled Stations", f"{uniq_st} Main Hubs")
             with kpi_t3: 
                 line_types = len(df_tr["LINE TYPE"].dropna().unique()) if "LINE TYPE" in df_tr.columns else 0
-                st.metric("🛣️ Active Running Configurations", f"{line_types} Track Lines")
+                st.metric(" Active Line Styles", f"{line_types} Types")
                 
             st.write("")
             
-            # Filter & Search Engine UI
-            search_tr = st.text_input("🔍 Infrastructure Attribute Search Desk", placeholder="Filter by station, crossing number, jurisdiction...", key="search_tr")
+            # Optimized Search Engine (Uses Vectorized Pandas operations instead of .apply loops)
+            search_tr = st.text_input("🔍 Infrastructure Attribute Search Desk", placeholder="Type crossing number or station name...", key="search_tr")
             
             fil_df_tr = df_tr.copy()
             if search_tr:
-                # Runs search filtration across all available table dimensions safely
-                combined_mask = fil_df_tr.astype(str).apply(lambda row: row.str.contains(search_tr, case=False).any(), axis=1)
-                fil_df_tr = fil_df_tr[combined_mask]
+                # Fast column search vector optimization
+                search_mask = fil_df_tr["PXING NO."].astype(str).str.contains(search_tr, case=False, na=False) | \
+                              fil_df_tr["OPERATING STATION"].astype(str).str.contains(search_tr, case=False, na=False)
+                
+                # Check additional common tracking columns if they exist
+                if "PWI Jurisdiction" in fil_df_tr.columns:
+                    search_mask |= fil_df_tr["PWI Jurisdiction"].astype(str).str.contains(search_tr, case=False, na=False)
+                    
+                fil_df_tr = fil_df_tr[search_mask]
 
-            # Mirrored Layout Cards Generation Loop
-            for _, row in fil_df_tr.iterrows():
+            # PAGINATION ENGINE FOR TAB 2 (Stops browser freeze)
+            total_filtered_tr = len(fil_df_tr)
+            if total_filtered_tr > max_cards:
+                st.info(f"💡 Showing first {max_cards} of {total_filtered_tr} configurations. Refine via search parameters above to view targeted nodes.")
+                display_df_tr = fil_df_tr.head(max_cards)
+            else:
+                display_df_tr = fil_df_tr
+
+            # Optimized Grid Render Loop
+            for _, row in display_df_tr.iterrows():
                 pxing = row.get("PXING NO.", "N/A")
                 station = row.get("OPERATING STATION", "Unknown Hub")
                 
-                # Dynamic Wrapper block header (Identical styling pattern)
                 st.markdown(f"""
                 <div class="rail-station-wrapper">
                     <div class="station-title-strip">
-                        🛤️ Crossing Index: <b>{pxing}</b> &nbsp;|&nbsp; Station Context: <b>{station}</b>
+                        Automated Crossing ID: <b>{pxing}</b> &nbsp;|&nbsp; Station Area: <b>{station}</b>
                     </div>
                 """, unsafe_allow_html=True)
                 
-                # Split row metadata cards into 4-column dynamic grid
                 cols_tr = st.columns(4)
                 for idx, col in enumerate(detail_columns):
                     val = row.get(col, "")
                     if val == "" or pd.isna(val):
                         val = "N/A"
                     
-                    # Renders using the elegant corporate sky-blue styling card configuration
-                    box_style = "infra-asset"
-                    
                     with cols_tr[idx % 4]:
                         st.markdown(f"""
-                        <div class="metric-box {box_style}">
+                        <div class="metric-box infra-asset">
                             <div class="metric-label">{col}</div>
                             <div class="metric-value">{val}</div>
                         </div>
