@@ -168,10 +168,10 @@ def login():
         </div>
         """, unsafe_allow_html=True)
         
-    with st.form("login_form"):
-        username = st.text_input("User ID")
-        password = st.text_input("Password", type="password")
-        submit = st.form_submit_button("Secure Sign In", use_container_width=True) #  Fixed line
+        with st.form("login_form"):
+            username = st.text_input("User ID")
+            password = st.text_input("Password", type="password")
+            submit = st.form_submit_button("Secure Sign In", use_container_width=True) #  Fixed line
             
             if submit:
                 try:
