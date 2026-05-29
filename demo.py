@@ -27,10 +27,17 @@ st.markdown("""
     }
 }
 
-@keyframes statusPulse {
-    0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.2); }
-    70% { box-shadow: 0 0 0 6px rgba(37, 99, 235, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+/* Dynamic Glow Keyframes for Safety Flags */
+@keyframes glowGreen {
+    0% { box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08), 0 0 0 0 rgba(34, 197, 94, 0.4); }
+    50% { box-shadow: 0 6px 20px rgba(34, 197, 94, 0.35), 0 0 14px 4px rgba(34, 197, 94, 0.2); }
+    100% { box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08), 0 0 0 0 rgba(34, 197, 94, 0); }
+}
+
+@keyframes glowRed {
+    0% { box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08), 0 0 0 0 rgba(239, 68, 68, 0.4); }
+    50% { box-shadow: 0 6px 20px rgba(239, 68, 68, 0.35), 0 0 14px 4px rgba(239, 68, 68, 0.2); }
+    100% { box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08), 0 0 0 0 rgba(239, 68, 68, 0); }
 }
 
 /* App Canvas Setup & Light Theme Reinforcement */
@@ -49,7 +56,7 @@ html, body, [class*="css"] {
     animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-/* FIXED: Sidebar Light Green Theme Styling Override */
+/* Sidebar Light Green Theme Styling Override */
 [data-testid="stSidebar"] {
     background: linear-gradient(180deg, #f0fdf4 0%, #dcfce7 100%);
     box-shadow: 4px 0 15px rgba(0,0,0,0.04);
@@ -165,8 +172,29 @@ html, body, [class*="css"] {
     transform: scale(1.03);
     background: #eff6ff;
     border-top-color: #1d4ed8;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08);
 }
+
+/* Flag Glowing Specific Assignments (Overriding standard active states conditionally) */
+.metric-box.flag-green-glow {
+    border-top: 4px solid #22c55e !important;
+    background: #f0fdf4 !important;
+    animation: glowGreen 2.5s infinite ease-in-out;
+}
+.metric-box.flag-green-glow:hover {
+    transform: scale(1.03);
+    background: #f0fdf4 !important;
+}
+
+.metric-box.flag-red-glow {
+    border-top: 4px solid #ef4444 !important;
+    background: #fef2f2 !important;
+    animation: glowRed 2.5s infinite ease-in-out;
+}
+.metric-box.flag-red-glow:hover {
+    transform: scale(1.03);
+    background: #fef2f2 !important;
+}
+
 .metric-box.zero-assets {
     border-top: 4px solid #94a3b8;
     background: #ffffff;
@@ -409,8 +437,20 @@ def main_portal():
             except (ValueError, TypeError):
                 value = raw_val
             
-            box_style = "zero-assets" if value == 0 else "active-assets"
-            val_style = "zero" if value == 0 else "active"
+            # 1. Evaluate baseline class style (Zero assets vs Active assets)
+            if value == 0:
+                box_style = "zero-assets"
+                val_style = "zero"
+            else:
+                box_style = "active-assets"
+                val_style = "active"
+                
+                # 2. FIXED: Inject customized glowing animations specifically for flag types
+                col_clean = col.lower()
+                if "green" in col_clean and "flag" in col_clean:
+                    box_style += " flag-green-glow"
+                elif "red" in col_clean and "flag" in col_clean:
+                    box_style += " flag-red-glow"
             
             with cols[i % 4]:
                 st.markdown(f"""
