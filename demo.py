@@ -353,7 +353,7 @@ def main_portal():
                 st.metric(" Controlled Stations", f"{uniq_st} Main Hubs")
             with kpi_t3: 
                 line_types = len(df_tr["LINE TYPE"].dropna().unique()) if "LINE TYPE" in df_tr.columns else 0
-                st.metric(" Active Line Styles", f"{line_types} Types")
+                st.metric(" Types of oeprational track", f"{line_types} Types")
                 
             st.write("")
             
@@ -388,7 +388,7 @@ def main_portal():
                 st.markdown(f"""
                 <div class="rail-station-wrapper">
                     <div class="station-title-strip">
-                        Automated Crossing ID: <b>{pxing}</b> &nbsp;|&nbsp; Station Area: <b>{station}</b>
+                        Point number: <b>{pxing}</b> &nbsp;|&nbsp; Operating Station/Cabin/RRI: <b>{station}</b>
                     </div>
                 """, unsafe_allow_html=True)
                 
