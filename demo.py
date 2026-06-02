@@ -7,7 +7,7 @@ from streamlit_folium import st_folium
 
 # ====================== PAGE CONFIG ======================
 st.set_page_config(
-    page_title="Solapur Division Equipment & Infrastructure Management System",
+    page_title="Solapur Division Equipment Management System",
     page_icon="🚉",
     layout="wide"
 )
@@ -245,9 +245,9 @@ def main_portal():
 
     # --- Sidebar Console Operations ---
     st.sidebar.markdown("### 🖥️ Controller Desk")
-    st.sidebar.caption("Security Status: Connected")
+    st.sidebar.caption("Google Sheet: Connected")
     
-    if st.sidebar.button("🔄 Sync Global Sheets & Clear Cache", use_container_width=True):
+    if st.sidebar.button("🔄 Sync Google Sheets & Clear Cache", use_container_width=True):
         load_secure_sheet.clear()
         st.rerun()
     if st.sidebar.button("🚪 Terminate Session", use_container_width=True):
@@ -255,7 +255,7 @@ def main_portal():
         st.rerun()
 
     # ====================== TABS ROUTER SETUP ======================
-    tab1, tab2 = st.tabs(["📦 Equipment Inventory Matrix", "🛤️ Track Crossing Layouts"])
+    tab1, tab2 = st.tabs(["🚞 Operating", "🛠️ Engineering"])
 
     # ---------------------------------------------------------------
     # TAB 1 (tab1): EQUIPMENT INVENTORY PORTAL
@@ -291,7 +291,7 @@ def main_portal():
                                 if not (pd.isna(lat) or pd.isna(lon)):
                                     folium.Marker(
                                         [lat, lon],
-                                        tooltip=f"Node: {row.get('STATION', 'Unknown')}",
+                                        tooltip=f"Station: {row.get('STATION', 'Unknown')}",
                                         icon=folium.Icon(color="blue", icon="train", prefix="fa")
                                     ).add_to(m)
                             except: continue
@@ -347,7 +347,7 @@ def main_portal():
             
             # Summary KPIs
             kpi_t1, kpi_t2, kpi_t3 = st.columns(3)
-            with kpi_t1: st.metric("🛤️ Infrastructure Nodes", f"{len(df_tr)} Crossings")
+            with kpi_t1: st.metric("🛤️ Active Points", f"{len(df_tr)} Crossings")
             with kpi_t2: 
                 uniq_st = len(df_tr["OPERATING STATION"].dropna().unique()) if "OPERATING STATION" in df_tr.columns else 0
                 st.metric(" Controlled Stations", f"{uniq_st} Main Hubs")
