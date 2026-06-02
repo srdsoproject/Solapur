@@ -313,7 +313,7 @@ def main_portal():
 
             # Optimized Grid View Render
             for _, row in display_df_eq.iterrows():
-                st.markdown(f'<div class="rail-station-wrapper"><div class="station-title-strip">🚉 Node: <b>{row.get("STATION", "Unknown")}</b></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="rail-station-wrapper"><div class="station-title-strip">🚉 Station: <b>{row.get("STATION", "Unknown")}</b></div>', unsafe_allow_html=True)
                 cols = st.columns(4)
                 for idx, col in enumerate(equipment_columns):
                     try:
