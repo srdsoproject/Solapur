@@ -238,8 +238,8 @@ def main_portal():
     # --- Header Banner Component ---
     st.markdown("""
     <div class="header-box">
-        <h1>🚉 Solapur Division Infrastructure Management Dashboard</h1>
-        <h4>Safety & Engineering Branch Operations Matrix — Central Railway</h4>
+        <h1>🚉 Solapur Division Inventory Management Dashboard</h1>
+        <h4>An initiative by Safety Branch Solapur Division</h4>
     </div>
     """, unsafe_allow_html=True)
 
