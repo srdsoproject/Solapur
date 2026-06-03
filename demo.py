@@ -302,7 +302,7 @@ def main_portal():
             fil_df_eq = df_eq[df_eq["STATION"].astype(str).str.contains(search_eq, case=False, na=False)] if search_eq else df_eq
 
             # PAGINATION ENGINE FOR TAB 1 (Prevents DOM hanging)
-            max_cards = 15
+            max_cards = 25
             total_filtered_eq = len(fil_df_eq)
             
             if total_filtered_eq > max_cards:
