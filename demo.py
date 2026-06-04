@@ -429,10 +429,6 @@ def main_portal():
             with kpi_tro2: 
                 total_rooms = len(df_tro["Running Room In-charge"].dropna()) if "Running Room In-charge" in df_tro.columns else 0
                 st.metric("🛏️ Managed Running Rooms", f"{total_rooms} Facilities")
-            with kpi_tro3: 
-                uniq_st_tro = df_tro["STATION"].nunique() if "STATION" in df_tro.columns else 0
-                st.metric("📍 Monitored Nodes", f"{uniq_st_tro} Stations")
-                
             st.write("")
             
             # --- Uniqueized Search Engine ---
@@ -463,7 +459,7 @@ def main_portal():
 
             # --- Grid Render Loop ---
             for _, row in display_df_tro.iterrows():
-                station_node = row.get("STATION", "Unknown Hub")
+                station_node = row.get("Station", "Unknown Hub")
                 
                 st.markdown(f"""
                 <div class="rail-station-wrapper">
