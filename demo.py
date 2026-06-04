@@ -20,7 +20,33 @@ st.markdown("""
     from { opacity: 0; transform: translateY(12px); }
     to { opacity: 1; transform: translateY(0); }
 }
+/* Professional Pulsating Glow for LED Signal Lamps */
+@keyframes professionalFlash {
+    0% { 
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.1); 
+        border-top-color: #f59e0b;
+        background: #fffbeb;
+    }
+    50% { 
+        box-shadow: 0 0 18px 6px rgba(245, 158, 11, 0.45); 
+        border-top-color: #d97706;
+        background: #fef3c7; /* Darker amber glow midpoint */
+    }
+    100% { 
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.1); 
+        border-top-color: #f59e0b;
+        background: #fffbeb;
+    }
+}
 
+/* Custom Class Binder */
+.metric-box.flag-flash-glow {
+    border-top: 4px solid #f59e0b !important;
+    animation: professionalFlash 2s infinite ease-in-out;
+}
+.metric-box.flag-flash-glow:hover { 
+    transform: scale(1.03); 
+}
 @keyframes glowGreen {
     0% { box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08), 0 0 0 0 rgba(34, 197, 94, 0.4); }
     50% { box-shadow: 0 6px 20px rgba(34, 197, 94, 0.35), 0 0 14px 4px rgba(34, 197, 94, 0.2); }
@@ -328,6 +354,8 @@ def main_portal():
                         col_clean = col.lower()
                         if "green" in col_clean and "flag" in col_clean: box_style += " flag-green-glow"
                         elif "red" in col_clean and "flag" in col_clean: box_style += " flag-red-glow"
+                        elif "hand signal lamp" in col_clean or "led" in col_clean:
+                            box_style += " flag-flash-glow"
                     
                     with cols[idx % 4]:
                         st.markdown(f'<div class="metric-box {box_style}"><div class="metric-label">{col}</div><div class="metric-value {val_style}">{val}</div></div>', unsafe_allow_html=True)
