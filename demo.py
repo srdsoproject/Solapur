@@ -255,7 +255,7 @@ def main_portal():
         st.rerun()
 
     # ====================== TABS ROUTER SETUP ======================
-    tab1, tab2 = st.tabs(["🚞 Operating", "🛠️ Engineering", "👨‍✈️ TRO" ])
+    tab1, tab2,tab3 = st.tabs(["🚞 Operating", "🛠️ Engineering", "👨‍✈️ TRO" ])
 
     # ---------------------------------------------------------------
     # TAB 1 (tab1): EQUIPMENT INVENTORY PORTAL
