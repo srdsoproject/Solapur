@@ -255,7 +255,7 @@ def main_portal():
         st.rerun()
 
     # ====================== TABS ROUTER SETUP ======================
-    tab1, tab2 = st.tabs(["🚞 Operating", "🛠️ Engineering"])
+    tab1, tab2 = st.tabs(["🚞 Operating", "🛠️ Engineering", "👨‍✈️ TRO" ])
 
     # ---------------------------------------------------------------
     # TAB 1 (tab1): EQUIPMENT INVENTORY PORTAL
@@ -407,6 +407,86 @@ def main_portal():
                         """, unsafe_allow_html=True)
                         
                 st.markdown("</div>", unsafe_allow_html=True)
+    
+       # ---------------------------------------------------------------
+    # TAB 3 (tab3): OPERATIONS LOUNGE & RUNNING ROOM MANAGEMENT
+    # ---------------------------------------------------------------
+    with tab3:
+        df_tro = load_secure_sheet("TRO", "NEW_SHEET_NAME_TRO")
+        
+        if df_tro.empty:
+            st.warning("⚠️ No active crew facility elements found inside the TRO matrix.")
+        else:
+            # Match the target structural columns
+            header_identifiers_tro = ["STATION"]
+            detail_columns_tro = [col for col in df_tro.columns if col not in header_identifiers_tro]
+            
+            # --- Summary KPIs ---
+            kpi_tro1, kpi_tro2, kpi_tro3 = st.columns(3)
+            with kpi_tro1: 
+                total_lobbies = len(df_tro["Lobby In-charge"].dropna()) if "Lobby In-charge" in df_tro.columns else 0
+                st.metric("🏢 Active Crew Lobbies", f"{total_lobbies} Operational")
+            with kpi_tro2: 
+                total_rooms = len(df_tro["Running Room In-charge"].dropna()) if "Running Room In-charge" in df_tro.columns else 0
+                st.metric("🛏️ Managed Running Rooms", f"{total_rooms} Facilities")
+            with kpi_tro3: 
+                uniq_st_tro = df_tro["STATION"].nunique() if "STATION" in df_tro.columns else 0
+                st.metric("📍 Monitored Nodes", f"{uniq_st_tro} Stations")
+                
+            st.write("")
+            
+            # --- Uniqueized Search Engine ---
+            # KEY CHANGE: Changed key to 'search_tro' to prevent crashing with Tab 2
+            search_tro = st.text_input("🔍 Operational Facility Search Desk", placeholder="Type station or personnel name...", key="search_tro")
+            
+            fil_df_tro = df_tro.copy()
+            if search_tro:
+                # Fast column search vector optimization matching your updated columns
+                search_mask_tro = fil_df_tro["STATION"].astype(str).str.contains(search_tro, case=False, na=False)
+                
+                if "Lobby In-charge" in fil_df_tro.columns:
+                    search_mask_tro |= fil_df_tro["Lobby In-charge"].astype(str).str.contains(search_tro, case=False, na=False)
+                if "Running Room In-charge" in fil_df_tro.columns:
+                    search_mask_tro |= fil_df_tro["Running Room In-charge"].astype(str).str.contains(search_tro, case=False, na=False)
+                    
+                fil_df_tro = fil_df_tro[search_mask_tro]
 
+            # --- Pagination Framework Handling ---
+            # Declaring max_cards locally to guarantee safe fallback processing
+            max_cards_tro = 25
+            total_filtered_tro = len(fil_df_tro)
+            if total_filtered_tro > max_cards_tro:
+                st.info(f"💡 Showing first {max_cards_tro} of {total_filtered_tro} personnel allocations. Refine your query above.")
+                display_df_tro = fil_df_tro.head(max_cards_tro)
+            else:
+                display_df_tro = fil_df_tro
+
+            # --- Grid Render Loop ---
+            for _, row in display_df_tro.iterrows():
+                station_node = row.get("STATION", "Unknown Hub")
+                
+                st.markdown(f"""
+                <div class="rail-station-wrapper">
+                    <div class="station-title-strip">
+                        🚉 Base Station Location: <b>{station_node}</b>
+                    </div>
+                """, unsafe_allow_html=True)
+                
+                # Render metrics for remaining tracking metrics (Lobby In-charge, Running Room In-charge)
+                cols_tro = st.columns(2)  # Balanced layout split for two primary target columns
+                for idx, col in enumerate(detail_columns_tro):
+                    val = row.get(col, "")
+                    if val == "" or pd.isna(val):
+                        val = "Not Assigned / Vacant"
+                    
+                    with cols_tro[idx % 2]:
+                        st.markdown(f"""
+                        <div class="metric-box infra-asset">
+                            <div class="metric-label">{col}</div>
+                            <div class="metric-value">{val}</div>
+                        </div>
+                        """, unsafe_allow_html=True)
+                        
+                st.markdown("</div>", unsafe_allow_html=True)
 if __name__ == "__main__":
     main_portal()
