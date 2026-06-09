@@ -96,25 +96,41 @@ def load_secure_sheet(sheet_id_key, sheet_name_key):
             scopes=["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
         )
         df = pd.DataFrame(gspread.authorize(creds).open_by_key(st.secrets[sheet_id_key]).worksheet(st.secrets[sheet_name_key]).get_all_records())
+        # Strip trailing/leading white space cleanly from headers
         df.columns = df.columns.str.strip()
         return df
     except Exception:
         st.error(f"🚨 Connection to Cloud Target matrix rejected.")
         return pd.DataFrame()
 
-# ====================== REUSABLE GRID COMPONENT ======================
-def render_metric_grid(df, title_template, detail_cols, col_layout=4, is_inventory=False):
-    """Dynamically prints structural cards containing responsive grid elements to reduce layout bloat."""
-    for _, row in df.iterrows():
-        # Safely execute string formatting
-        st.markdown(title_template.format(**row.to_dict()), unsafe_allow_html=True)
-        cols = st.columns(col_layout)
+# ====================== AUTOMATED DYNAMIC GRID COMPONENT ======================
+def render_dynamic_grid(df, icon_emoji="📦", col_layout=4, is_inventory=False):
+    """Automatically extracts all headers from the sheet. 
+    Uses the 1st column as the layout strip title, and renders everything else as dynamic subcards."""
+    if df.empty:
+        return
         
+    all_headers = list(df.columns)
+    title_column = all_headers[0]  # First column dynamically acts as the card identifier
+    
+    # Detail columns are all remaining headers (ignoring GIS coords to avoid cluttering cards)
+    detail_cols = [c for c in all_headers if c not in [title_column, "LATITUDE", "LONGITUDE"]]
+    
+    for _, row in df.iterrows():
+        title_value = row.get(title_column, "Unknown Node")
+        
+        # Build the HTML title bar anchor dynamically using the first sheet column
+        st.markdown(f"""
+        <div class="rail-station-wrapper">
+            <div class="station-title-strip">{icon_emoji} {title_column}: <b>{title_value}</b></div>
+        """, unsafe_allow_html=True)
+        
+        cols = st.columns(col_layout)
         for idx, col in enumerate(detail_cols):
             raw = row.get(col, 0 if is_inventory else "N/A")
             val = "N/A" if (pd.isna(raw) or raw == "") else raw
             
-            # CSS Subclass Assignment Selector
+            # CSS UI Selector engine
             if is_inventory:
                 try: val = int(float(raw)) if raw != "" and not pd.isna(raw) else 0
                 except: val = raw
@@ -122,7 +138,7 @@ def render_metric_grid(df, title_template, detail_cols, col_layout=4, is_invento
                 val_style = "zero" if val == 0 else "active"
                 
                 if val != 0:
-                    c_clean = col.lower()
+                    c_clean = str(col).lower()
                     if "green" in c_clean and "flag" in c_clean: box_style += " flag-green-glow"
                     elif "red" in c_clean and "flag" in c_clean: box_style += " flag-red-glow"
                     elif "lamp" in c_clean or "led" in c_clean: box_style += " flag-flash-glow"
@@ -170,12 +186,13 @@ def main_portal():
         if df_eq.empty:
             st.warning("⚠️ No active rows found inside Equipment Inventory database.")
         else:
-            eq_cols = [c for c in df_eq.columns if c not in ["STATION", "LATITUDE", "LONGITUDE"]]
+            first_col = df_eq.columns[0]
+            other_cols = [c for c in df_eq.columns if c not in [first_col, "LATITUDE", "LONGITUDE"]]
             
             kpi1, kpi2, kpi3 = st.columns(3)
-            num_df = df_eq[eq_cols].apply(pd.to_numeric, errors='coerce').fillna(0)
-            kpi1.metric("🚏 Active Stations", f"{len(df_eq)} Locations")
-            kpi2.metric("🛠️ Categorized Asset Classes", f"{len(eq_cols)} Types")
+            num_df = df_eq[other_cols].apply(pd.to_numeric, errors='coerce').fillna(0)
+            kpi1.metric("🚏 Active Nodes", f"{len(df_eq)} Locations")
+            kpi2.metric("🛠️ Tracked Column Heads", f"{len(df_eq.columns)} Metrics")
             kpi3.metric("📦 Gross Physical Units", f"{int(num_df.sum().sum()):,} Elements")
             
             if "LATITUDE" in df_eq.columns and "LONGITUDE" in df_eq.columns:
@@ -188,21 +205,17 @@ def main_portal():
                             try:
                                 lat, lon = float(r["LATITUDE"]), float(r["LONGITUDE"])
                                 if not (pd.isna(lat) or pd.isna(lon)):
-                                    folium.Marker([lat, lon], tooltip=f"Station: {r.get('STATION', 'Unknown')}", icon=folium.Icon(color="blue", icon="train", prefix="fa")).add_to(m)
+                                    folium.Marker([lat, lon], tooltip=f"Location: {r.get(first_col, 'Unknown')}", icon=folium.Icon(color="blue", icon="train", prefix="fa")).add_to(m)
                             except: continue
                         st_folium(m, width="100%", height=320, key="global_gis_map", returned_objects=[])
 
-            search_eq = st.text_input("🔍 Operational Node Filter Engine", placeholder="Type station name...", key="search_eq")
-            fil_df = df_eq[df_eq["STATION"].astype(str).str.contains(search_eq, case=False, na=False)] if search_eq else df_eq
+            search_eq = st.text_input("🔍 Operational Search Desk Filter", placeholder=f"Search by {first_col}...", key="search_eq")
+            fil_df = df_eq[df_eq[first_col].astype(str).str.contains(search_eq, case=False, na=False)] if search_eq else df_eq
             
             if len(fil_df) > max_cards:
-                st.info(f"💡 Showing first {max_cards} of {len(fil_df)} locations. Refine search above.")
+                st.info(f"💡 Showing first {max_cards} of {len(fil_df)} rows. Refine search above.")
             
-            render_metric_grid(
-                fil_df.head(max_cards), 
-                '<div class="rail-station-wrapper"><div class="station-title-strip">🚉 Station: <b>{{STATION}}</b></div>', 
-                eq_cols, is_inventory=True
-            )
+            render_dynamic_grid(fil_df.head(max_cards), icon_emoji="🚞", is_inventory=True)
 
     # ---------------------------------------------------------------
     # TAB 2: ENGINEERING
@@ -212,33 +225,20 @@ def main_portal():
         if df_tr.empty:
             st.warning("⚠️ No active infrastructure data elements found.")
         else:
-            # Drop structural labels from columns to show inside grid
-            tr_cols = [c for c in df_tr.columns if c not in ["PXING NO.", "OPERATING STATION"]]
+            first_col = df_tr.columns[0]
+            kpi_t1, kpi_t2 = st.columns(2)
+            kpi_t1.metric("🛤️ Total Matrix Items", f"{len(df_tr)} Records")
+            kpi_t2.metric("📋 Structural Column Metrics", f"{len(df_tr.columns)} Heads")
             
-            kpi_t1, kpi_t2, kpi_t3 = st.columns(3)
-            kpi_t1.metric("🛤️ Active Points", f"{len(df_tr)} Crossings")
-            kpi_t2.metric("🏬 Controlled Stations", f"{len(df_tr['OPERATING STATION'].dropna().unique()) if 'OPERATING STATION' in df_tr.columns else 0} Main Hubs")
-            
-            # Safe unique counter check
-            line_type_count = len(df_tr['LINE TYPE'].dropna().unique()) if 'LINE TYPE' in df_tr.columns else 0
-            kpi_t3.metric("🛤️ Types of operational track", f"{line_type_count} Types")
-            
-            search_tr = st.text_input("🔍 Infrastructure Attribute Search Desk", placeholder="Type crossing number or station name...", key="search_tr")
+            search_tr = st.text_input("🔍 Engineering Search Desk Filter", placeholder=f"Search by {first_col}...", key="search_tr")
             fil_df_tr = df_tr.copy()
             if search_tr:
-                mask = fil_df_tr["PXING NO."].astype(str).str.contains(search_tr, case=False, na=False) | fil_df_tr["OPERATING STATION"].astype(str).str.contains(search_tr, case=False, na=False)
-                if "PWI Jurisdiction" in fil_df_tr.columns:
-                    mask |= fil_df_tr["PWI Jurisdiction"].astype(str).str.contains(search_tr, case=False, na=False)
-                fil_df_tr = fil_df_tr[mask]
+                fil_df_tr = fil_df_tr[fil_df_tr[first_col].astype(str).str.contains(search_tr, case=False, na=False)]
                 
             if len(fil_df_tr) > max_cards:
-                st.info(f"💡 Showing first {max_cards} of {len(fil_df_tr)} configurations. Refine search parameters above.")
+                st.info(f"💡 Showing first {max_cards} lines. Refine search parameters above.")
                 
-            render_metric_grid(
-                fil_df_tr.head(max_cards),
-                '<div class="rail-station-wrapper"><div class="station-title-strip">Point number: <b>{{PXING NO.}}</b> &nbsp;|&nbsp; Operating Station/Cabin/RRI: <b>{{OPERATING STATION}}</b></div>',
-                tr_cols
-            )
+            render_dynamic_grid(fil_df_tr.head(max_cards), icon_emoji="🛠️")
 
     # ---------------------------------------------------------------
     # TAB 3: TRO
@@ -248,68 +248,43 @@ def main_portal():
         if df_tro.empty:
             st.warning("⚠️ No active crew facility elements found inside the TRO matrix.")
         else:
-            tro_cols = [c for c in df_tro.columns if c != "STATION"]
+            first_col = df_tro.columns[0]
+            kpi_tro1, kpi_tro2 = st.columns(2)
+            kpi_tro1.metric("🏢 Facilities Logged", f"{len(df_tro)} Units")
+            kpi_tro2.metric("📋 Automated System Headers", f"{len(df_tro.columns)} Fields")
             
-            kpi_tro1, kpi_tro2, _ = st.columns(3)
-            kpi_tro1.metric("🏢 Active Crew Lobbies", f"{len(df_tro['Lobby In-charge'].dropna()) if 'Lobby In-charge' in df_tro.columns else 0} Operational")
-            kpi_tro2.metric("🛏️ Managed Running Rooms", f"{len(df_tro['Running Room In-charge'].dropna()) if 'Running Room In-charge' in df_tro.columns else 0} Facilities")
-            
-            search_tro = st.text_input("🔍 Operational Facility Search Desk", placeholder="Type station or personnel name...", key="search_tro")
+            search_tro = st.text_input("🔍 Crew Management Search Filter", placeholder=f"Search by {first_col}...", key="search_tro")
             fil_df_tro = df_tro.copy()
             if search_tro:
-                mask = fil_df_tro["STATION"].astype(str).str.contains(search_tro, case=False, na=False)
-                for opt_col in ["Lobby In-charge", "Running Room In-charge"]:
-                    if opt_col in fil_df_tro.columns:
-                        mask |= fil_df_tro[opt_col].astype(str).str.contains(search_tro, case=False, na=False)
-                fil_df_tro = fil_df_tro[mask]
+                fil_df_tro = fil_df_tro[fil_df_tro[first_col].astype(str).str.contains(search_tro, case=False, na=False)]
                 
             if len(fil_df_tro) > max_cards:
-                st.info(f"💡 Showing first {max_cards} of {len(fil_df_tro)} personnel allocations. Refine your query above.")
+                st.info(f"💡 Showing first {max_cards} configurations. Refine your query above.")
                 
-            render_metric_grid(
-                fil_df_tro.head(max_cards),
-                '<div class="rail-station-wrapper"><div class="station-title-strip">🚉 Base Station Location: <b>{{STATION}}</b></div>',
-                tro_cols, col_layout=2
-            )
+            render_dynamic_grid(fil_df_tro.head(max_cards), icon_emoji="👨‍✈️", col_layout=2)
 
     # ---------------------------------------------------------------
-    # TAB 4: TRD (Fixed and Sanitized template format)
+    # TAB 4: TRD
     # ---------------------------------------------------------------
     with tab4:
         df_trd = load_secure_sheet("SHEET_ID_TRD", "SHEET_NAME_TRD")
         if df_trd.empty:
             st.warning("⚠️ No active Traction Distribution (TRD) data elements found.")
         else:
-            # Standardize structural columns to avoid template injection crashes
-            if "SECTOR" not in df_trd.columns:
-                df_trd["SECTOR"] = "General"
-                
-            trd_cols = [c for c in df_trd.columns if c not in ["STATION", "SECTOR"]]
+            first_col = df_trd.columns[0]
+            kpi_trd1, kpi_trd2 = st.columns(2)
+            kpi_trd1.metric("⚡ TRD Operations Sectors", f"{len(df_trd)} Monitored Records")
+            kpi_trd2.metric("📋 Tracked System Headers", f"{len(df_trd.columns)} Fields")
             
-            kpi_trd1, kpi_trd2, kpi_trd3 = st.columns(3)
-            kpi_trd1.metric("⚡ TRD Sectors/Stations", f"{len(df_trd['STATION'].dropna().unique()) if 'STATION' in df_trd.columns else 0} Monitored")
-            try:
-                gross_trd = int(df_trd[trd_cols].apply(pd.to_numeric, errors='coerce').fillna(0).sum().sum())
-            except: gross_trd = 0
-            kpi_trd2.metric("📦 OHE/PSI Asset Inventory", f"{gross_trd:,} Elements" if gross_trd > 0 else "Active Log")
-            kpi_trd3.metric("🔧 Specialized Asset Classes", f"{len(trd_cols)} Monitored Types")
-            
-            search_trd = st.text_input("🔍 TRD Asset Search Desk", placeholder="Type station, sector, or asset name...", key="search_trd")
+            search_trd = st.text_input("🔍 TRD Technical Asset Search Filter", placeholder=f"Search by {first_col}...", key="search_trd")
             fil_df_trd = df_trd.copy()
             if search_trd:
-                mask = fil_df_trd["STATION"].astype(str).str.contains(search_trd, case=False, na=False)
-                mask |= fil_df_trd["SECTOR"].astype(str).str.contains(search_trd, case=False, na=False)
-                fil_df_trd = fil_df_trd[mask]
+                fil_df_trd = fil_df_trd[fil_df_trd[first_col].astype(str).str.contains(search_trd, case=False, na=False)]
                 
             if len(fil_df_trd) > max_cards:
-                st.info(f"💡 Showing first {max_cards} of {len(fil_df_trd)} TRD zones. Refine via search parameters above.")
+                st.info(f"💡 Showing first {max_cards} zones. Refine via search parameters above.")
                 
-            # Safely render using standard DataFrame mapping keys
-            render_metric_grid(
-                fil_df_trd.head(max_cards),
-                '<div class="rail-station-wrapper"><div class="station-title-strip">⚡ TRD Station Location: <b>{{STATION}}</b> &nbsp;|&nbsp; Sector: <b>{{SECTOR}}</b></div>',
-                trd_cols
-            )
+            render_dynamic_grid(fil_df_trd.head(max_cards), icon_emoji="⚡")
 
     # ---------------------------------------------------------------
     # TAB 5: LC GATES
@@ -319,31 +294,20 @@ def main_portal():
         if df_lc.empty:
             st.warning("⚠️ No active Level Crossing (LC) Gate structural elements found.")
         else:
-            lc_cols = [c for c in df_lc.columns if c not in ["LC Gate", "Section"]]
+            first_col = df_lc.columns[0]
+            kpi_lc1, kpi_lc2 = st.columns(2)
+            kpi_lc1.metric("🚧 Level Crossing Records", f"{len(df_lc)} Active Crossings")
+            kpi_lc2.metric("📋 Automated Gate Fields", f"{len(df_lc.columns)} Column heads")
             
-            kpi_lc1, kpi_lc2, kpi_lc3 = st.columns(3)
-            kpi_lc1.metric("🚧 Total Managed Crossings", f"{len(df_lc)} Gates")
-            kpi_lc2.metric("📍 Monitored Sections", f"{len(df_lc['Section'].dropna().unique()) if 'Section' in df_lc.columns else 0} Route Zones")
-            
-            operated_by_count = len(df_lc['Operated by'].dropna().unique()) if 'Operated by' in df_lc.columns else 0
-            kpi_lc3.metric("⚙️ Operations Staffing", f"{operated_by_count} Handlers")
-            
-            search_lc = st.text_input("🔍 Level Crossing Attribute Search Desk", placeholder="Type LC gate number or route section...", key="search_lc")
+            search_lc = st.text_input("🔍 Crossing Point Search Filter", placeholder=f"Search by {first_col}...", key="search_lc")
             fil_df_lc = df_lc.copy()
             if search_lc:
-                mask = fil_df_lc["LC Gate"].astype(str).str.contains(search_lc, case=False, na=False)
-                if "Section" in fil_df_lc.columns:
-                    mask |= fil_df_lc["Section"].astype(str).str.contains(search_lc, case=False, na=False)
-                fil_df_lc = fil_df_lc[mask]
+                fil_df_lc = fil_df_lc[fil_df_lc[first_col].astype(str).str.contains(search_lc, case=False, na=False)]
                 
             if len(fil_df_lc) > max_cards:
-                st.info(f"💡 Showing first {max_cards} of {len(fil_df_lc)} LC configurations. Refine search criteria above.")
+                st.info(f"💡 Showing first {max_cards} configurations. Refine search criteria above.")
                 
-            render_metric_grid(
-                fil_df_lc.head(max_cards),
-                '<div class="rail-station-wrapper"><div class="station-title-strip">🚧 Level Crossing (LC) Gate: <b>{{LC Gate}}</b> &nbsp;|&nbsp; Section: <b>{{Section}}</b></div>',
-                lc_cols
-            )
+            render_dynamic_grid(fil_df_lc.head(max_cards), icon_emoji="🚧")
 
 if __name__ == "__main__":
     main_portal()
