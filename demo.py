@@ -173,9 +173,9 @@ def main_portal():
             
             kpi1, kpi2, kpi3 = st.columns(3)
             num_df = df_eq[eq_cols].apply(pd.to_numeric, errors='coerce').fillna(0)
-            kpi1.st.metric("🚏 Active Stations", f"{len(df_eq)} Locations")
-            kpi2.st.metric("🛠️ Categorized Asset Classes", f"{len(eq_cols)} Types")
-            kpi3.st.metric("📦 Gross Physical Units", f"{int(num_df.sum().sum()):,} Elements")
+            kpi1.metric("🚏 Active Stations", f"{len(df_eq)} Locations")
+            kpi2.metric("🛠️ Categorized Asset Classes", f"{len(eq_cols)} Types")
+            kpi3.metric("📦 Gross Physical Units", f"{int(num_df.sum().sum()):,} Elements")
             
             if "LATITUDE" in df_eq.columns and "LONGITUDE" in df_eq.columns:
                 with st.expander("🗺️ Division GIS Spatial Mapping Overview", expanded=False):
@@ -214,9 +214,9 @@ def main_portal():
             tr_cols = [c for c in df_tr.columns if c not in ["PXING NO.", "OPERATING STATION"]]
             
             kpi_t1, kpi_t2, kpi_t3 = st.columns(3)
-            kpi_t1.st.metric("🛤️ Active Points", f"{len(df_tr)} Crossings")
-            kpi_t2.st.metric("🏬 Controlled Stations", f"{len(df_tr['OPERATING STATION'].dropna().unique()) if 'OPERATING STATION' in df_tr.columns else 0} Main Hubs")
-            kpi_t3.st.metric("🛤️ Types of operational track", f"{len(df_tr['LINE TYPE'].dropna().unique()) if 'LINE TYPE' in df_tr.columns else 0} Types")
+            kpi_t1.metric("🛤️ Active Points", f"{len(df_tr)} Crossings")
+            kpi_t2.metric("🏬 Controlled Stations", f"{len(df_tr['OPERATING STATION'].dropna().unique()) if 'OPERATING STATION' in df_tr.columns else 0} Main Hubs")
+            kpi_t3.metric("🛤️ Types of operational track", f"{len(df_tr['LINE TYPE'].dropna().unique()) if 'LINE TYPE' in df_tr.columns else 0} Types")
             
             search_tr = st.text_input("🔍 Infrastructure Attribute Search Desk", placeholder="Type crossing number or station name...", key="search_tr")
             fil_df_tr = df_tr.copy()
@@ -246,8 +246,8 @@ def main_portal():
             tro_cols = [c for c in df_tro.columns if c != "STATION"]
             
             kpi_tro1, kpi_tro2, _ = st.columns(3)
-            kpi_tro1.st.metric("🏢 Active Crew Lobbies", f"{len(df_tro['Lobby In-charge'].dropna()) if 'Lobby In-charge' in df_tro.columns else 0} Operational")
-            kpi_tro2.st.metric("🛏️ Managed Running Rooms", f"{len(df_tro['Running Room In-charge'].dropna()) if 'Running Room In-charge' in df_tro.columns else 0} Facilities")
+            kpi_tro1.metric("🏢 Active Crew Lobbies", f"{len(df_tro['Lobby In-charge'].dropna()) if 'Lobby In-charge' in df_tro.columns else 0} Operational")
+            kpi_tro2.metric("🛏️ Managed Running Rooms", f"{len(df_tro['Running Room In-charge'].dropna()) if 'Running Room In-charge' in df_tro.columns else 0} Facilities")
             
             search_tro = st.text_input("🔍 Operational Facility Search Desk", placeholder="Type station or personnel name...", key="search_tro")
             fil_df_tro = df_tro.copy()
@@ -278,12 +278,12 @@ def main_portal():
             trd_cols = [c for c in df_trd.columns if c not in ["STATION", "SECTOR"]]
             
             kpi_trd1, kpi_trd2, kpi_trd3 = st.columns(3)
-            kpi_trd1.st.metric("⚡ TRD Sectors/Stations", f"{len(df_trd['STATION'].dropna().unique()) if 'STATION' in df_trd.columns else 0} Monitored")
+            kpi_trd1.metric("⚡ TRD Sectors/Stations", f"{len(df_trd['STATION'].dropna().unique()) if 'STATION' in df_trd.columns else 0} Monitored")
             try:
                 gross_trd = int(df_trd[trd_cols].apply(pd.to_numeric, errors='coerce').fillna(0).sum().sum())
             except: gross_trd = 0
-            kpi_trd2.st.metric("📦 OHE/PSI Asset Inventory", f"{gross_trd:,} Elements" if gross_trd > 0 else "Active Log")
-            kpi_trd3.st.metric("🔧 Specialized Asset Classes", f"{len(trd_cols)} Monitored Types")
+            kpi_trd2.metric("📦 OHE/PSI Asset Inventory", f"{gross_trd:,} Elements" if gross_trd > 0 else "Active Log")
+            kpi_trd3.metric("🔧 Specialized Asset Classes", f"{len(trd_cols)} Monitored Types")
             
             search_trd = st.text_input("🔍 TRD Asset Search Desk", placeholder="Type station, sector, or asset name...", key="search_trd")
             fil_df_trd = df_trd.copy()
@@ -312,9 +312,9 @@ def main_portal():
             lc_cols = [c for c in df_lc.columns if c not in ["LC Gate", "Section"]]
             
             kpi_lc1, kpi_lc2, kpi_lc3 = st.columns(3)
-            kpi_lc1.st.metric("🚧 Total Managed Crossings", f"{len(df_lc)} Gates")
-            kpi_lc2.st.metric("📍 Monitored Sections", f"{len(df_lc['Section'].dropna().unique()) if 'Section' in df_lc.columns else 0} Route Zones")
-            kpi_lc3.st.metric("⚙️ Operations Staffing", f"{len(df_lc['Operated by'].dropna().unique()) if 'Operated by' in df_lc.columns else 0} Handlers")
+            kpi_lc1.metric("🚧 Total Managed Crossings", f"{len(df_lc)} Gates")
+            kpi_lc2.metric("📍 Monitored Sections", f"{len(df_lc['Section'].dropna().unique()) if 'Section' in df_lc.columns else 0} Route Zones")
+            kpi_lc3.metric("⚙️ Operations Staffing", f"{len(df_lc['Operated by'].dropna().unique()) if 'Operated by' in df_lc.columns else 0} Handlers")
             
             search_lc = st.text_input("🔍 Level Crossing Attribute Search Desk", placeholder="Type LC gate number or route section...", key="search_lc")
             fil_df_lc = df_lc.copy()
