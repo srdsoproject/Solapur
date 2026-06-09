@@ -565,7 +565,7 @@ def main_portal():
 
             # --- Optimized CSS Grid Render Loop ---
             for _, row in display_df_trd.iterrows():
-                station_trd = row.get("STATION", "Unknown Station")
+                station_trd = row.get("TSS", "Unknown Station")
                 sector_trd = f" | Sector: {row.get('SECTOR', 'N/A')}" if "SECTOR" in row else ""
                 
                 st.markdown(f"""
