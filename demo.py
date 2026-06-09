@@ -281,7 +281,7 @@ def main_portal():
         st.rerun()
 
     # ====================== TABS ROUTER SETUP ======================
-    tab1, tab2,tab3 = st.tabs(["🚞 Operating", "🛠️ Engineering", "👨‍✈️ TRO" ])
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(["🚞 Operating", "🛠️ Engineering", "👨‍✈️ TRO", "⚡ TRD", "🚧 LC Gates"])
 
     # ---------------------------------------------------------------
     # TAB 1 (tab1): EQUIPMENT INVENTORY PORTAL
@@ -504,6 +504,161 @@ def main_portal():
                         val = "Not Assigned / Vacant"
                     
                     with cols_tro[idx % 2]:
+                        st.markdown(f"""
+                        <div class="metric-box infra-asset">
+                            <div class="metric-label">{col}</div>
+                            <div class="metric-value">{val}</div>
+                        </div>
+                        """, unsafe_allow_html=True)
+                        
+                st.markdown("</div>", unsafe_allow_html=True)
+        # ===============================================================
+    # TAB 4: TRD (TRACTION DISTRIBUTION) OVERVIEW
+    # ===============================================================
+    with tab4:
+        # Reuses your core Google Sheet data loader function
+        df_trd = load_secure_sheet("SHEET_ID_TRD", "SHEET_NAME_TRD")
+        
+        if df_trd.empty:
+            st.warning("⚠️ No active Traction Distribution (TRD) data elements found.")
+        else:
+            # Isolating primary geographical keys from dynamic attributes
+            header_identifiers_trd = ["STATION", "SECTOR"]
+            detail_columns_trd = [col for col in df_trd.columns if col not in header_identifiers_trd]
+            
+            # --- Summary KPIs ---
+            kpi_trd1, kpi_trd2, kpi_trd3 = st.columns(3)
+            with kpi_trd1:
+                total_trd_locs = len(df_trd["STATION"].dropna().unique()) if "STATION" in df_trd.columns else 0
+                st.metric("⚡ TRD Sectors/Stations", f"{total_trd_locs} Monitored")
+            with kpi_trd2:
+                # Attempts a total dynamic equipment count if numeric values exist
+                try:
+                    num_df_trd = df_trd[detail_columns_trd].apply(pd.to_numeric, errors='coerce').fillna(0)
+                    gross_trd_elements = int(num_df_trd.sum().sum())
+                except:
+                    gross_trd_elements = 0
+                st.metric("📦 OHE/PSI Asset Inventory", f"{gross_trd_elements:,} Elements" if gross_trd_elements > 0 else "Active Log")
+            with kpi_trd3:
+                st.metric("🔧 Specialized Asset Classes", f"{len(detail_columns_trd)} Monitored Types")
+                
+            st.write("")
+            
+            # --- Vectorized Search Desk ---
+            search_trd = st.text_input("🔍 TRD Asset Search Desk", placeholder="Type station, sector, or asset name...", key="search_trd")
+            
+            fil_df_trd = df_trd.copy()
+            if search_trd:
+                search_mask_trd = fil_df_trd["STATION"].astype(str).str.contains(search_trd, case=False, na=False)
+                if "SECTOR" in fil_df_trd.columns:
+                    search_mask_trd |= fil_df_trd["SECTOR"].astype(str).str.contains(search_trd, case=False, na=False)
+                fil_df_trd = fil_df_trd[search_mask_trd]
+
+            # --- Safety Pagination Engine ---
+            max_cards_trd = 25
+            total_filtered_trd = len(fil_df_trd)
+            if total_filtered_trd > max_cards_trd:
+                st.info(f"💡 Showing first {max_cards_trd} of {total_filtered_trd} TRD zones. Refine via search parameters above.")
+                display_df_trd = fil_df_trd.head(max_cards_trd)
+            else:
+                display_df_trd = fil_df_trd
+
+            # --- Optimized CSS Grid Render Loop ---
+            for _, row in display_df_trd.iterrows():
+                station_trd = row.get("STATION", "Unknown Station")
+                sector_trd = f" | Sector: {row.get('SECTOR', 'N/A')}" if "SECTOR" in row else ""
+                
+                st.markdown(f"""
+                <div class="rail-station-wrapper">
+                    <div class="station-title-strip">
+                        ⚡ TRD Station Location: <b>{station_trd}</b>{sector_trd}
+                    </div>
+                """, unsafe_allow_html=True)
+                
+                cols_trd = st.columns(4)
+                for idx, col in enumerate(detail_columns_trd):
+                    val = row.get(col, "")
+                    if val == "" or pd.isna(val):
+                        val = "0"
+                        
+                    with cols_trd[idx % 4]:
+                        st.markdown(f"""
+                        <div class="metric-box infra-asset">
+                            <div class="metric-label">{col}</div>
+                            <div class="metric-value">{val}</div>
+                        </div>
+                        """, unsafe_allow_html=True)
+                        
+                st.markdown("</div>", unsafe_allow_html=True)
+
+
+    # ===============================================================
+    # TAB 5: LC (LEVEL CROSSING) GATES MANAGEMENT
+    # ===============================================================
+    with tab5:
+        # Reuses your core Google Sheet data loader function
+        df_lc = load_secure_sheet("SHEET_ID_LC", "SHEET_NAME_LC")
+        
+        if df_lc.empty:
+            st.warning("⚠️ No active Level Crossing (LC) Gate structural elements found.")
+        else:
+            # Isolating unique key metrics for the header card banner layout
+            header_identifiers_lc = ["LC NO.", "STATION JURISDICTION"]
+            detail_columns_lc = [col for col in df_lc.columns if col not in header_identifiers_lc]
+            
+            # --- Summary KPIs ---
+            kpi_lc1, kpi_lc2, kpi_lc3 = st.columns(3)
+            with kpi_lc1:
+                st.metric("🚧 Total Managed Crossings", f"{len(df_lc)} Intersections")
+            with kpi_lc2:
+                inter_st = len(df_lc["STATION JURISDICTION"].dropna().unique()) if "STATION JURISDICTION" in df_lc.columns else 0
+                st.metric("📍 Interlocking Stations", f"{inter_st} Blocks")
+            with kpi_lc3:
+                # Looks for a "STATUS" or "CLASS" column if present to filter metrics dynamically
+                status_col = [c for c in df_lc.columns if "STATUS" in c.upper() or "CLASS" in c.upper()]
+                lc_meta = f"{df_lc[status_col[0]].iloc[0]}" if status_col else "Monitored Safety"
+                st.metric("🛡️ Compliance Metrics", f"{len(detail_columns_lc)} Operational Parameters")
+                
+            st.write("")
+            
+            # --- Vectorized Search Desk ---
+            search_lc = st.text_input("🔍 Level Crossing Attribute Search Desk", placeholder="Type LC gate number or station jurisdiction...", key="search_lc")
+            
+            fil_df_lc = df_lc.copy()
+            if search_lc:
+                search_mask_lc = fil_df_lc["LC NO."].astype(str).str.contains(search_lc, case=False, na=False)
+                if "STATION JURISDICTION" in fil_df_lc.columns:
+                    search_mask_lc |= fil_df_lc["STATION JURISDICTION"].astype(str).str.contains(search_lc, case=False, na=False)
+                fil_df_lc = fil_df_lc[search_mask_lc]
+
+            # --- Safety Pagination Engine ---
+            max_cards_lc = 25
+            total_filtered_lc = len(fil_df_lc)
+            if total_filtered_lc > max_cards_lc:
+                st.info(f"💡 Showing first {max_cards_lc} of {total_filtered_lc} LC configurations. Refine search criteria above.")
+                display_df_lc = fil_df_lc.head(max_cards_lc)
+            else:
+                display_df_lc = fil_df_lc
+
+            # --- Optimized CSS Grid Render Loop ---
+            for _, row in display_df_lc.iterrows():
+                lc_no = row.get("LC NO.", "N/A")
+                jurisdiction = row.get("STATION JURISDICTION", "Unknown Section")
+                
+                st.markdown(f"""
+                <div class="rail-station-wrapper">
+                    <div class="station-title-strip">
+                        🚧 Level Crossing (LC) Gate No: <b>{lc_no}</b> &nbsp;|&nbsp; Station Jurisdiction: <b>{jurisdiction}</b>
+                    </div>
+                """, unsafe_allow_html=True)
+                
+                cols_lc = st.columns(4)
+                for idx, col in enumerate(detail_columns_lc):
+                    val = row.get(col, "")
+                    if val == "" or pd.isna(val):
+                        val = "N/A"
+                        
+                    with cols_lc[idx % 4]:
                         st.markdown(f"""
                         <div class="metric-box infra-asset">
                             <div class="metric-label">{col}</div>
