@@ -106,7 +106,8 @@ def load_secure_sheet(sheet_id_key, sheet_name_key):
 def render_metric_grid(df, title_template, detail_cols, col_layout=4, is_inventory=False):
     """Dynamically prints structural cards containing responsive grid elements to reduce layout bloat."""
     for _, row in df.iterrows():
-        st.markdown(title_template.format(**row), unsafe_allow_html=True)
+        # Safely execute string formatting
+        st.markdown(title_template.format(**row.to_dict()), unsafe_allow_html=True)
         cols = st.columns(col_layout)
         
         for idx, col in enumerate(detail_cols):
@@ -199,7 +200,7 @@ def main_portal():
             
             render_metric_grid(
                 fil_df.head(max_cards), 
-                '<div class="rail-station-wrapper"><div class="station-title-strip">🚉 Station: <b>{STATION}</b></div>', 
+                '<div class="rail-station-wrapper"><div class="station-title-strip">🚉 Station: <b>{{STATION}}</b></div>', 
                 eq_cols, is_inventory=True
             )
 
@@ -211,12 +212,16 @@ def main_portal():
         if df_tr.empty:
             st.warning("⚠️ No active infrastructure data elements found.")
         else:
+            # Drop structural labels from columns to show inside grid
             tr_cols = [c for c in df_tr.columns if c not in ["PXING NO.", "OPERATING STATION"]]
             
             kpi_t1, kpi_t2, kpi_t3 = st.columns(3)
             kpi_t1.metric("🛤️ Active Points", f"{len(df_tr)} Crossings")
             kpi_t2.metric("🏬 Controlled Stations", f"{len(df_tr['OPERATING STATION'].dropna().unique()) if 'OPERATING STATION' in df_tr.columns else 0} Main Hubs")
-            kpi_t3.metric("🛤️ Types of operational track", f"{len(df_tr['LINE TYPE'].dropna().unique()) if 'LINE TYPE' in df_tr.columns else 0} Types")
+            
+            # Safe unique counter check
+            line_type_count = len(df_tr['LINE TYPE'].dropna().unique()) if 'LINE TYPE' in df_tr.columns else 0
+            kpi_t3.metric("🛤️ Types of operational track", f"{line_type_count} Types")
             
             search_tr = st.text_input("🔍 Infrastructure Attribute Search Desk", placeholder="Type crossing number or station name...", key="search_tr")
             fil_df_tr = df_tr.copy()
@@ -231,7 +236,7 @@ def main_portal():
                 
             render_metric_grid(
                 fil_df_tr.head(max_cards),
-                '<div class="rail-station-wrapper"><div class="station-title-strip">Point number: <b>{PXING NO.}</b> &nbsp;|&nbsp; Operating Station/Cabin/RRI: <b>{OPERATING STATION}</b></div>',
+                '<div class="rail-station-wrapper"><div class="station-title-strip">Point number: <b>{{PXING NO.}}</b> &nbsp;|&nbsp; Operating Station/Cabin/RRI: <b>{{OPERATING STATION}}</b></div>',
                 tr_cols
             )
 
@@ -263,18 +268,22 @@ def main_portal():
                 
             render_metric_grid(
                 fil_df_tro.head(max_cards),
-                '<div class="rail-station-wrapper"><div class="station-title-strip">🚉 Base Station Location: <b>{STATION}</b></div>',
+                '<div class="rail-station-wrapper"><div class="station-title-strip">🚉 Base Station Location: <b>{{STATION}}</b></div>',
                 tro_cols, col_layout=2
             )
 
     # ---------------------------------------------------------------
-    # TAB 4: TRD
+    # TAB 4: TRD (Fixed and Sanitized template format)
     # ---------------------------------------------------------------
     with tab4:
         df_trd = load_secure_sheet("SHEET_ID_TRD", "SHEET_NAME_TRD")
         if df_trd.empty:
             st.warning("⚠️ No active Traction Distribution (TRD) data elements found.")
         else:
+            # Standardize structural columns to avoid template injection crashes
+            if "SECTOR" not in df_trd.columns:
+                df_trd["SECTOR"] = "General"
+                
             trd_cols = [c for c in df_trd.columns if c not in ["STATION", "SECTOR"]]
             
             kpi_trd1, kpi_trd2, kpi_trd3 = st.columns(3)
@@ -289,17 +298,18 @@ def main_portal():
             fil_df_trd = df_trd.copy()
             if search_trd:
                 mask = fil_df_trd["STATION"].astype(str).str.contains(search_trd, case=False, na=False)
-                if "SECTOR" in fil_df_trd.columns:
-                    mask |= fil_df_trd["SECTOR"].astype(str).str.contains(search_trd, case=False, na=False)
+                mask |= fil_df_trd["SECTOR"].astype(str).str.contains(search_trd, case=False, na=False)
                 fil_df_trd = fil_df_trd[mask]
                 
             if len(fil_df_trd) > max_cards:
                 st.info(f"💡 Showing first {max_cards} of {len(fil_df_trd)} TRD zones. Refine via search parameters above.")
                 
-            for _, row in fil_df_trd.head(max_cards).iterrows():
-                sec_str = f" | Sector: {row['SECTOR']}" if ("SECTOR" in row and pd.notna(row['SECTOR'])) else ""
-                title_html = f'<div class="rail-station-wrapper"><div class="station-title-strip">⚡ TRD Station Location: <b>{row.get("STATION", "Unknown Station")}</b>{sec_str}</div>'
-                render_metric_grid(pd.DataFrame([row]), title_html, trd_cols)
+            # Safely render using standard DataFrame mapping keys
+            render_metric_grid(
+                fil_df_trd.head(max_cards),
+                '<div class="rail-station-wrapper"><div class="station-title-strip">⚡ TRD Station Location: <b>{{STATION}}</b> &nbsp;|&nbsp; Sector: <b>{{SECTOR}}</b></div>',
+                trd_cols
+            )
 
     # ---------------------------------------------------------------
     # TAB 5: LC GATES
@@ -314,7 +324,9 @@ def main_portal():
             kpi_lc1, kpi_lc2, kpi_lc3 = st.columns(3)
             kpi_lc1.metric("🚧 Total Managed Crossings", f"{len(df_lc)} Gates")
             kpi_lc2.metric("📍 Monitored Sections", f"{len(df_lc['Section'].dropna().unique()) if 'Section' in df_lc.columns else 0} Route Zones")
-            kpi_lc3.metric("⚙️ Operations Staffing", f"{len(df_lc['Operated by'].dropna().unique()) if 'Operated by' in df_lc.columns else 0} Handlers")
+            
+            operated_by_count = len(df_lc['Operated by'].dropna().unique()) if 'Operated by' in df_lc.columns else 0
+            kpi_lc3.metric("⚙️ Operations Staffing", f"{operated_by_count} Handlers")
             
             search_lc = st.text_input("🔍 Level Crossing Attribute Search Desk", placeholder="Type LC gate number or route section...", key="search_lc")
             fil_df_lc = df_lc.copy()
@@ -329,7 +341,7 @@ def main_portal():
                 
             render_metric_grid(
                 fil_df_lc.head(max_cards),
-                '<div class="rail-station-wrapper"><div class="station-title-strip">🚧 Level Crossing (LC) Gate: <b>{LC Gate}</b> &nbsp;|&nbsp; Section: <b>{Section}</b></div>',
+                '<div class="rail-station-wrapper"><div class="station-title-strip">🚧 Level Crossing (LC) Gate: <b>{{LC Gate}}</b> &nbsp;|&nbsp; Section: <b>{{Section}}</b></div>',
                 lc_cols
             )
 
