@@ -141,7 +141,7 @@ def render_dynamic_grid(df, icon_emoji="📦", col_layout=4, is_inventory=False)
                     c_clean = str(col).lower()
                     if "green" in c_clean and "flag" in c_clean: box_style += " flag-green-glow"
                     elif "red" in c_clean and "flag" in c_clean: box_style += " flag-red-glow"
-                    elif "lamp" in c_clean or "led" in c_clean: box_style += " flag-flash-glow"
+                    elif "led" in c_clean: box_style += " flag-flash-glow"
             else:
                 box_style = "infra-asset"
                 val_style = "active"
