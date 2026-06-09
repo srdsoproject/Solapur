@@ -591,8 +591,7 @@ def main_portal():
                         
                 st.markdown("</div>", unsafe_allow_html=True)
 
-
-    # ===============================================================
+# ===============================================================
     # TAB 5: LC (LEVEL CROSSING) GATES MANAGEMENT
     # ===============================================================
     with tab5:
@@ -602,33 +601,34 @@ def main_portal():
         if df_lc.empty:
             st.warning("⚠️ No active Level Crossing (LC) Gate structural elements found.")
         else:
-            # Isolating unique key metrics for the header card banner layout
-            header_identifiers_lc = ["LC NO.", "STATION JURISDICTION"]
+            # Map explicit identifiers to match your Google Sheet columns
+            header_identifiers_lc = ["LC Gate", "Section"]
             detail_columns_lc = [col for col in df_lc.columns if col not in header_identifiers_lc]
             
             # --- Summary KPIs ---
             kpi_lc1, kpi_lc2, kpi_lc3 = st.columns(3)
             with kpi_lc1:
-                st.metric("🚧 Total Managed Crossings", f"{len(df_lc)} Intersections")
+                st.metric("🚧 Total Managed Crossings", f"{len(df_lc)} Gates")
             with kpi_lc2:
-                inter_st = len(df_lc["STATION JURISDICTION"].dropna().unique()) if "STATION JURISDICTION" in df_lc.columns else 0
-                st.metric("📍 Interlocking Stations", f"{inter_st} Blocks")
+                # Dynamically maps unique sections or controlling hubs
+                inter_st = len(df_lc["Section"].dropna().unique()) if "Section" in df_lc.columns else 0
+                st.metric("📍 Monitored Sections", f"{inter_st} Route Zones")
             with kpi_lc3:
-                # Looks for a "STATUS" or "CLASS" column if present to filter metrics dynamically
-                status_col = [c for c in df_lc.columns if "STATUS" in c.upper() or "CLASS" in c.upper()]
-                lc_meta = f"{df_lc[status_col[0]].iloc[0]}" if status_col else "Monitored Safety"
-                st.metric("🛡️ Compliance Metrics", f"{len(detail_columns_lc)} Operational Parameters")
+                # Captures the overall classification/operational split count
+                ops_types = len(df_lc["Operated by"].dropna().unique()) if "Operated by" in df_lc.columns else 0
+                st.metric("⚙️ Operations Staffing", f"{ops_types} Handlers")
                 
             st.write("")
             
             # --- Vectorized Search Desk ---
-            search_lc = st.text_input("🔍 Level Crossing Attribute Search Desk", placeholder="Type LC gate number or station jurisdiction...", key="search_lc")
+            search_lc = st.text_input("🔍 Level Crossing Attribute Search Desk", placeholder="Type LC gate number or route section...", key="search_lc")
             
             fil_df_lc = df_lc.copy()
             if search_lc:
-                search_mask_lc = fil_df_lc["LC NO."].astype(str).str.contains(search_lc, case=False, na=False)
-                if "STATION JURISDICTION" in fil_df_lc.columns:
-                    search_mask_lc |= fil_df_lc["STATION JURISDICTION"].astype(str).str.contains(search_lc, case=False, na=False)
+                # Vectorized fallback targeting your core parameters
+                search_mask_lc = fil_df_lc["LC Gate"].astype(str).str.contains(search_lc, case=False, na=False)
+                if "Section" in fil_df_lc.columns:
+                    search_mask_lc |= fil_df_lc["Section"].astype(str).str.contains(search_lc, case=False, na=False)
                 fil_df_lc = fil_df_lc[search_mask_lc]
 
             # --- Safety Pagination Engine ---
@@ -642,13 +642,13 @@ def main_portal():
 
             # --- Optimized CSS Grid Render Loop ---
             for _, row in display_df_lc.iterrows():
-                lc_no = row.get("LC NO.", "N/A")
-                jurisdiction = row.get("STATION JURISDICTION", "Unknown Section")
+                lc_name = row.get("LC Gate", "N/A")
+                route_section = row.get("Section", "Unknown Section")
                 
                 st.markdown(f"""
                 <div class="rail-station-wrapper">
                     <div class="station-title-strip">
-                        🚧 Level Crossing (LC) Gate No: <b>{lc_no}</b> &nbsp;|&nbsp; Station Jurisdiction: <b>{jurisdiction}</b>
+                        🚧 Level Crossing (LC) Gate: <b>{lc_name}</b> &nbsp;|&nbsp; Section: <b>{route_section}</b>
                     </div>
                 """, unsafe_allow_html=True)
                 
