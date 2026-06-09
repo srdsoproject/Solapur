@@ -15,203 +15,52 @@ st.set_page_config(
 # ====================== STYLING ENGINE ======================
 st.markdown("""
 <style>
-/* Smooth Viewport Entrance Animations */
-@keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(12px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-/* Professional Pulsating Glow for LED Signal Lamps */
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes professionalFlash {
-    0% { 
-        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.1); 
-        border-top-color: #f59e0b;
-        background: #fffbeb;
-    }
-    50% { 
-        box-shadow: 0 0 18px 6px rgba(245, 158, 11, 0.45); 
-        border-top-color: #d97706;
-        background: #fef3c7; /* Darker amber glow midpoint */
-    }
-    100% { 
-        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.1); 
-        border-top-color: #f59e0b;
-        background: #fffbeb;
-    }
-}
-
-/* Custom Class Binder */
-.metric-box.flag-flash-glow {
-    border-top: 4px solid #f59e0b !important;
-    animation: professionalFlash 2s infinite ease-in-out;
-}
-.metric-box.flag-flash-glow:hover { 
-    transform: scale(1.03); 
+    0%, 100% { box-shadow: 0 4px 12px rgba(245, 158, 11, 0.1); border-top-color: #f59e0b; background: #fffbeb; }
+    50% { box-shadow: 0 0 18px 6px rgba(245, 158, 11, 0.45); border-top-color: #d97706; background: #fef3c7; }
 }
 @keyframes glowGreen {
-    0% { box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08), 0 0 0 0 rgba(34, 197, 94, 0.4); }
+    0%, 100% { box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08), 0 0 0 0 rgba(34, 197, 94, 0); }
     50% { box-shadow: 0 6px 20px rgba(34, 197, 94, 0.35), 0 0 14px 4px rgba(34, 197, 94, 0.2); }
-    100% { box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08), 0 0 0 0 rgba(34, 197, 94, 0); }
 }
-
 @keyframes glowRed {
-    0% { box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08), 0 0 0 0 rgba(239, 68, 68, 0.4); }
+    0%, 100% { box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08), 0 0 0 0 rgba(239, 68, 68, 0); }
     50% { box-shadow: 0 6px 20px rgba(239, 68, 68, 0.35), 0 0 14px 4px rgba(239, 68, 68, 0.2); }
-    100% { box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08), 0 0 0 0 rgba(239, 68, 68, 0); }
 }
-
-/* App Canvas Setup & Theme Reinforcement */
-.stApp {
-    background-color: #f8fafc;
-    color: #0f172a;
-}
-
-html, body, [class*="css"] {
-    font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
-}
-
-.block-container {
-    padding-top: 1.5rem;
-    max-width: 1550px;
-    animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-/* Sidebar Light Green Theme Styling Override */
-[data-testid="stSidebar"] {
-    background: linear-gradient(180deg, #f0fdf4 0%, #dcfce7 100%);
-    box-shadow: 4px 0 15px rgba(0,0,0,0.04);
-    border-right: 1px solid #bbf7d0;
-}
+.stApp { background-color: #f8fafc; color: #0f172a; }
+html, body, [class*="css"] { font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif; }
+.block-container { padding-top: 1.5rem; max-width: 1550px; animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
+[data-testid="stSidebar"] { background: linear-gradient(180deg, #f0fdf4 0%, #dcfce7 100%); box-shadow: 4px 0 15px rgba(0,0,0,0.04); border-right: 1px solid #bbf7d0; }
 [data-testid="stSidebar"] h3 { color: #14532d !important; }
-[data-testid="stSidebar"] caption, [data-testid="stSidebar"] p, [data-testid="stSidebar"] span {
-    color: #166534 !important;
-}
-
-/* Tab Component Styling Overrides */
-button[data-baseweb="tab"] {
-    font-size: 16px !important;
-    font-weight: 600 !important;
-    padding: 12px 24px !important;
-}
-
-/* Enterprise Header Component */
-.header-box {
-    background: linear-gradient(135deg, #1e3a8a 0%, #0369a1 100%);
-    padding: 30px 40px;
-    border-radius: 12px;
-    margin-bottom: 25px;
-    box-shadow: 0 10px 30px rgba(30, 58, 138, 0.12);
-    border-left: 6px solid #38bdf8;
-    position: relative;
-    overflow: hidden;
-}
-.header-box h1 {
-    color: #ffffff !important;
-    font-size: 34px;
-    font-weight: 800;
-    margin: 0 0 6px 0;
-    letter-spacing: -0.5px;
-}
-.header-box h4 {
-    color: #bae6fd !important;
-    font-weight: 400;
-    margin: 0;
-    letter-spacing: 0.2px;
-}
-
-/* Structural Wrapper Card */
-.rail-station-wrapper {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 22px;
-    margin-bottom: 25px;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.02);
-    transition: border-color 0.25s ease;
-}
-.rail-station-wrapper:hover {
-    border-color: #cbd5e1;
-}
-.station-title-strip {
-    font-size: 20px;
-    font-weight: 700;
-    color: #1e3a8a !important;
-    border-bottom: 2px solid #f1f5f9;
-    padding-bottom: 10px;
-    margin-bottom: 18px;
-}
-
-/* Interactive Dynamic Grid Elements */
-.metric-box {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    padding: 16px 14px;
-    text-align: center;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 6px;
-}
+[data-testid="stSidebar"] caption, [data-testid="stSidebar"] p, [data-testid="stSidebar"] span { color: #166534 !important; }
+button[data-baseweb="tab"] { font-size: 16px !important; font-weight: 600 !important; padding: 12px 24px !important; }
+.header-box { background: linear-gradient(135deg, #1e3a8a 0%, #0369a1 100%); padding: 30px 40px; border-radius: 12px; margin-bottom: 25px; box-shadow: 0 10px 30px rgba(30, 58, 138, 0.12); border-left: 6px solid #38bdf8; }
+.header-box h1 { color: #ffffff !important; font-size: 34px; font-weight: 800; margin: 0 0 6px 0; letter-spacing: -0.5px; }
+.header-box h4 { color: #bae6fd !important; font-weight: 400; margin: 0; letter-spacing: 0.2px; }
+.rail-station-wrapper { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 22px; margin-bottom: 25px; box-shadow: 0 4px 14px rgba(0,0,0,0.02); }
+.station-title-strip { font-size: 20px; font-weight: 700; color: #1e3a8a !important; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 18px; }
+.metric-box { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px 14px; text-align: center; transition: all 0.2s ease; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 6px; }
 .metric-box.active-assets { border-top: 4px solid #2563eb; background: #f8fafc; }
-.metric-box.active-assets:hover { transform: scale(1.03); background: #eff6ff; border-top-color: #1d4ed8; }
-
-/* Infrastructure layout specific card styling variant */
+.metric-box.active-assets:hover { transform: scale(1.03); background: #eff6ff; }
 .metric-box.infra-asset { border-top: 4px solid #0284c7; background: #f0f9ff; }
-.metric-box.infra-asset:hover { transform: scale(1.03); background: #e0f2fe; border-top-color: #0369a1; }
-
-.metric-box.flag-green-glow {
-    border-top: 4px solid #22c55e !important;
-    background: #f0fdf4 !important;
-    animation: glowGreen 2.5s infinite ease-in-out;
-}
-.metric-box.flag-green-glow:hover { transform: scale(1.03); background: #f0fdf4 !important; }
-
-.metric-box.flag-red-glow {
-    border-top: 4px solid #ef4444 !important;
-    background: #fef2f2 !important;
-    animation: glowRed 2.5s infinite ease-in-out;
-}
-.metric-box.flag-red-glow:hover { transform: scale(1.03); background: #fef2f2 !important; }
-
+.metric-box.infra-asset:hover { transform: scale(1.03); background: #e0f2fe; }
+.metric-box.flag-green-glow { border-top: 4px solid #22c55e !important; background: #f0fdf4 !important; animation: glowGreen 2.5s infinite ease-in-out; }
+.metric-box.flag-red-glow { border-top: 4px solid #ef4444 !important; background: #fef2f2 !important; animation: glowRed 2.5s infinite ease-in-out; }
+.metric-box.flag-flash-glow { border-top: 4px solid #f59e0b !important; animation: professionalFlash 2s infinite ease-in-out; }
 .metric-box.zero-assets { border-top: 4px solid #94a3b8; background: #ffffff; opacity: 0.75; }
-.metric-box.zero-assets:hover { opacity: 1.0; background: #f8fafc; }
-
-/* Unified Font Sizes for Label and Value */
-.metric-label {
-    color: #334155 !important;
-    font-size: 16px !important;
-    font-weight: 600 !important;
-    text-transform: capitalize;
-    letter-spacing: 0.2px;
-    line-height: 1.3;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.metric-value { color: #1e3a8a !important; font-size: 18px !important; font-weight: 700 !important; margin: 0; }
+.metric-label { color: #334155 !important; font-size: 14px !important; font-weight: 600 !important; text-transform: capitalize; text-align: center; line-height: 1.3; margin: 0; }
+.metric-value { color: #1e3a8a !important; font-size: 17px !important; font-weight: 700 !important; margin: 0; }
 .metric-value.zero { color: #94a3b8 !important; font-weight: 600; }
-
-/* Form Panel Adjustments */
-.stButton > button {
-    border-radius: 6px;
-    font-weight: 600;
-    transition: all 0.2s ease;
-}
 </style>
 """, unsafe_allow_html=True)
 
 # ====================== LOGIN SERVICE ======================
 def login():
-    if "authenticated" not in st.session_state:
-        st.session_state.authenticated = False
-    if st.session_state.authenticated:
+    if st.session_state.get("authenticated"):
         return True
-
-    col1, col2, col3 = st.columns([1, 1.6, 1])
+    
+    _, col2, _ = st.columns([1, 1.6, 1])
     with col2:
         st.write("")
         st.markdown("""
@@ -224,8 +73,7 @@ def login():
         with st.form("login_form"):
             username = st.text_input("Operator User ID")
             password = st.text_input("Security Access Password", type="password")
-            submit = st.form_submit_button("Secure Log In", use_container_width=True)
-            if submit:
+            if st.form_submit_button("Secure Log In", use_container_width=True):
                 try:
                     if username == st.secrets["APP_USERNAME"] and password == st.secrets["APP_PASSWORD"]:
                         st.session_state.authenticated = True
@@ -243,25 +91,55 @@ if not login():
 @st.cache_data(ttl=300, show_spinner="Fetching Data Matrix...")
 def load_secure_sheet(sheet_id_key, sheet_name_key):
     try:
-        sheet_id = st.secrets[sheet_id_key]
-        sheet_name = st.secrets[sheet_name_key]
         creds = Credentials.from_service_account_info(
             st.secrets["gcp_service_account"],
             scopes=["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
         )
-        gc = gspread.authorize(creds)
-        sh = gc.open_by_key(sheet_id)
-        worksheet = sh.worksheet(sheet_name)
-        df = pd.DataFrame(worksheet.get_all_records())
+        df = pd.DataFrame(gspread.authorize(creds).open_by_key(st.secrets[sheet_id_key]).worksheet(st.secrets[sheet_name_key]).get_all_records())
         df.columns = df.columns.str.strip()
         return df
-    except Exception as e:
+    except Exception:
         st.error(f"🚨 Connection to Cloud Target matrix rejected.")
         return pd.DataFrame()
 
+# ====================== REUSABLE GRID COMPONENT ======================
+def render_metric_grid(df, title_template, detail_cols, col_layout=4, is_inventory=False):
+    """Dynamically prints structural cards containing responsive grid elements to reduce layout bloat."""
+    for _, row in df.iterrows():
+        st.markdown(title_template.format(**row), unsafe_allow_html=True)
+        cols = st.columns(col_layout)
+        
+        for idx, col in enumerate(detail_cols):
+            raw = row.get(col, 0 if is_inventory else "N/A")
+            val = "N/A" if (pd.isna(raw) or raw == "") else raw
+            
+            # CSS Subclass Assignment Selector
+            if is_inventory:
+                try: val = int(float(raw)) if raw != "" and not pd.isna(raw) else 0
+                except: val = raw
+                box_style = "zero-assets" if val == 0 else "active-assets"
+                val_style = "zero" if val == 0 else "active"
+                
+                if val != 0:
+                    c_clean = col.lower()
+                    if "green" in c_clean and "flag" in c_clean: box_style += " flag-green-glow"
+                    elif "red" in c_clean and "flag" in c_clean: box_style += " flag-red-glow"
+                    elif "lamp" in c_clean or "led" in c_clean: box_style += " flag-flash-glow"
+            else:
+                box_style = "infra-asset"
+                val_style = "active"
+                
+            with cols[idx % col_layout]:
+                st.markdown(f"""
+                <div class="metric-box {box_style}">
+                    <div class="metric-label">{col}</div>
+                    <div class="metric-value {val_style}">{val}</div>
+                </div>
+                """, unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
+
 # ====================== APPLICATION MAIN CORE ======================
 def main_portal():
-    # --- Header Banner Component ---
     st.markdown("""
     <div class="header-box">
         <h1>🚉 Solapur Division Inventory Management Dashboard</h1>
@@ -280,392 +158,180 @@ def main_portal():
         st.session_state.authenticated = False
         st.rerun()
 
-    # ====================== TABS ROUTER SETUP ======================
     tab1, tab2, tab3, tab4, tab5 = st.tabs(["🚞 Operating", "🛠️ Engineering", "👨‍✈️ TRO", "⚡ TRD", "🚧 LC Gates"])
+    max_cards = 25
 
     # ---------------------------------------------------------------
-    # TAB 1 (tab1): EQUIPMENT INVENTORY PORTAL
+    # TAB 1: OPERATING
     # ---------------------------------------------------------------
     with tab1:
         df_eq = load_secure_sheet("SHEET_ID", "SHEET_NAME")
         if df_eq.empty:
             st.warning("⚠️ No active rows found inside Equipment Inventory database.")
         else:
-            exclude_cols = ["STATION", "LATITUDE", "LONGITUDE"]
-            equipment_columns = [col for col in df_eq.columns if col not in exclude_cols]
+            eq_cols = [c for c in df_eq.columns if c not in ["STATION", "LATITUDE", "LONGITUDE"]]
             
-            # Summary KPI Cards
-            kpi_col1, kpi_col2, kpi_col3 = st.columns(3)
-            num_df = df_eq[equipment_columns].apply(pd.to_numeric, errors='coerce').fillna(0)
-            with kpi_col1: st.metric("🚏 Active Stations", f"{len(df_eq)} Locations")
-            with kpi_col2: st.metric("🛠️ Categorized Asset Classes", f"{len(equipment_columns)} Types")
-            with kpi_col3: st.metric("📦 Gross Physical Units", f"{int(num_df.sum().sum()):,} Elements")
+            kpi1, kpi2, kpi3 = st.columns(3)
+            num_df = df_eq[eq_cols].apply(pd.to_numeric, errors='coerce').fillna(0)
+            kpi1.st.metric("🚏 Active Stations", f"{len(df_eq)} Locations")
+            kpi2.st.metric("🛠️ Categorized Asset Classes", f"{len(eq_cols)} Types")
+            kpi3.st.metric("📦 Gross Physical Units", f"{int(num_df.sum().sum()):,} Elements")
             
-            st.write("")
-            
-            # GIS Engine Map (With explicit session handling key)
             if "LATITUDE" in df_eq.columns and "LONGITUDE" in df_eq.columns:
                 with st.expander("🗺️ Division GIS Spatial Mapping Overview", expanded=False):
                     map_lat = pd.to_numeric(df_eq["LATITUDE"], errors='coerce').dropna().mean()
                     map_lon = pd.to_numeric(df_eq["LONGITUDE"], errors='coerce').dropna().mean()
                     if not (pd.isna(map_lat) or pd.isna(map_lon)):
-                        m = folium.Map(location=[map_lat, map_lon], zoom_start=8, tiles="OpenStreetMap")
-                        # Add a limit to markers if map lags
-                        for _, row in df_eq.head(40).iterrows():
+                        m = folium.Map(location=[map_lat, map_lon], zoom_start=8)
+                        for _, r in df_eq.head(40).iterrows():
                             try:
-                                lat, lon = float(row["LATITUDE"]), float(row["LONGITUDE"])
+                                lat, lon = float(r["LATITUDE"]), float(r["LONGITUDE"])
                                 if not (pd.isna(lat) or pd.isna(lon)):
-                                    folium.Marker(
-                                        [lat, lon],
-                                        tooltip=f"Station: {row.get('STATION', 'Unknown')}",
-                                        icon=folium.Icon(color="blue", icon="train", prefix="fa")
-                                    ).add_to(m)
+                                    folium.Marker([lat, lon], tooltip=f"Station: {r.get('STATION', 'Unknown')}", icon=folium.Icon(color="blue", icon="train", prefix="fa")).add_to(m)
                             except: continue
                         st_folium(m, width="100%", height=320, key="global_gis_map", returned_objects=[])
 
-            # Filter Search
             search_eq = st.text_input("🔍 Operational Node Filter Engine", placeholder="Type station name...", key="search_eq")
-            fil_df_eq = df_eq[df_eq["STATION"].astype(str).str.contains(search_eq, case=False, na=False)] if search_eq else df_eq
-
-            # PAGINATION ENGINE FOR TAB 1 (Prevents DOM hanging)
-            max_cards = 25
-            total_filtered_eq = len(fil_df_eq)
+            fil_df = df_eq[df_eq["STATION"].astype(str).str.contains(search_eq, case=False, na=False)] if search_eq else df_eq
             
-            if total_filtered_eq > max_cards:
-                st.info(f"💡 Showing first {max_cards} of {total_filtered_eq} locations. Use search above to find specific stations.")
-                display_df_eq = fil_df_eq.head(max_cards)
-            else:
-                display_df_eq = fil_df_eq
-
-            # Optimized Grid View Render
-            for _, row in display_df_eq.iterrows():
-                st.markdown(f'<div class="rail-station-wrapper"><div class="station-title-strip">🚉 Station: <b>{row.get("STATION", "Unknown")}</b></div>', unsafe_allow_html=True)
-                cols = st.columns(4)
-                for idx, col in enumerate(equipment_columns):
-                    try:
-                        raw = row.get(col, 0)
-                        val = int(float(raw)) if raw != "" and not pd.isna(raw) else 0
-                    except: val = raw
-                    
-                    box_style = "zero-assets" if val == 0 else "active-assets"
-                    val_style = "zero" if val == 0 else "active"
-                    
-                    if val != 0:
-                        col_clean = col.lower()
-                        if "green" in col_clean and "flag" in col_clean: box_style += " flag-green-glow"
-                        elif "red" in col_clean and "flag" in col_clean: box_style += " flag-red-glow"
-                        elif "hand signal lamp" in col_clean or "led" in col_clean:
-                            box_style += " flag-flash-glow"
-                    
-                    with cols[idx % 4]:
-                        st.markdown(f'<div class="metric-box {box_style}"><div class="metric-label">{col}</div><div class="metric-value {val_style}">{val}</div></div>', unsafe_allow_html=True)
-                st.markdown("</div>", unsafe_allow_html=True)
+            if len(fil_df) > max_cards:
+                st.info(f"💡 Showing first {max_cards} of {len(fil_df)} locations. Refine search above.")
+            
+            render_metric_grid(
+                fil_df.head(max_cards), 
+                '<div class="rail-station-wrapper"><div class="station-title-strip">🚉 Station: <b>{STATION}</b></div>', 
+                eq_cols, is_inventory=True
+            )
 
     # ---------------------------------------------------------------
-    # TAB 2 (tab2): NEW TRACK CROSSINGS LAYOUT PORTAL (OPTIMIZED)
+    # TAB 2: ENGINEERING
     # ---------------------------------------------------------------
     with tab2:
         df_tr = load_secure_sheet("NEW_SHEET_ID", "NEW_SHEET_NAME")
-        
         if df_tr.empty:
             st.warning("⚠️ No active infrastructure data elements found.")
         else:
-            header_identifiers = ["PXING NO.", "OPERATING STATION"]
-            detail_columns = [col for col in df_tr.columns if col not in header_identifiers]
+            tr_cols = [c for c in df_tr.columns if c not in ["PXING NO.", "OPERATING STATION"]]
             
-            # Summary KPIs
             kpi_t1, kpi_t2, kpi_t3 = st.columns(3)
-            with kpi_t1: st.metric("🛤️ Active Points", f"{len(df_tr)} Crossings")
-            with kpi_t2: 
-                uniq_st = len(df_tr["OPERATING STATION"].dropna().unique()) if "OPERATING STATION" in df_tr.columns else 0
-                st.metric(" Controlled Stations", f"{uniq_st} Main Hubs")
-            with kpi_t3: 
-                line_types = len(df_tr["LINE TYPE"].dropna().unique()) if "LINE TYPE" in df_tr.columns else 0
-                st.metric(" Types of oeprational track", f"{line_types} Types")
-                
-            st.write("")
+            kpi_t1.st.metric("🛤️ Active Points", f"{len(df_tr)} Crossings")
+            kpi_t2.st.metric("🏬 Controlled Stations", f"{len(df_tr['OPERATING STATION'].dropna().unique()) if 'OPERATING STATION' in df_tr.columns else 0} Main Hubs")
+            kpi_t3.st.metric("🛤️ Types of operational track", f"{len(df_tr['LINE TYPE'].dropna().unique()) if 'LINE TYPE' in df_tr.columns else 0} Types")
             
-            # Optimized Search Engine (Uses Vectorized Pandas operations instead of .apply loops)
             search_tr = st.text_input("🔍 Infrastructure Attribute Search Desk", placeholder="Type crossing number or station name...", key="search_tr")
-            
             fil_df_tr = df_tr.copy()
             if search_tr:
-                # Fast column search vector optimization
-                search_mask = fil_df_tr["PXING NO."].astype(str).str.contains(search_tr, case=False, na=False) | \
-                              fil_df_tr["OPERATING STATION"].astype(str).str.contains(search_tr, case=False, na=False)
-                
-                # Check additional common tracking columns if they exist
+                mask = fil_df_tr["PXING NO."].astype(str).str.contains(search_tr, case=False, na=False) | fil_df_tr["OPERATING STATION"].astype(str).str.contains(search_tr, case=False, na=False)
                 if "PWI Jurisdiction" in fil_df_tr.columns:
-                    search_mask |= fil_df_tr["PWI Jurisdiction"].astype(str).str.contains(search_tr, case=False, na=False)
-                    
-                fil_df_tr = fil_df_tr[search_mask]
-
-            # PAGINATION ENGINE FOR TAB 2 (Stops browser freeze)
-            total_filtered_tr = len(fil_df_tr)
-            if total_filtered_tr > max_cards:
-                st.info(f"💡 Showing first {max_cards} of {total_filtered_tr} configurations. Refine via search parameters above to view targeted nodes.")
-                display_df_tr = fil_df_tr.head(max_cards)
-            else:
-                display_df_tr = fil_df_tr
-
-            # Optimized Grid Render Loop
-            for _, row in display_df_tr.iterrows():
-                pxing = row.get("PXING NO.", "N/A")
-                station = row.get("OPERATING STATION", "Unknown Hub")
+                    mask |= fil_df_tr["PWI Jurisdiction"].astype(str).str.contains(search_tr, case=False, na=False)
+                fil_df_tr = fil_df_tr[mask]
                 
-                st.markdown(f"""
-                <div class="rail-station-wrapper">
-                    <div class="station-title-strip">
-                        Point number: <b>{pxing}</b> &nbsp;|&nbsp; Operating Station/Cabin/RRI: <b>{station}</b>
-                    </div>
-                """, unsafe_allow_html=True)
+            if len(fil_df_tr) > max_cards:
+                st.info(f"💡 Showing first {max_cards} of {len(fil_df_tr)} configurations. Refine search parameters above.")
                 
-                cols_tr = st.columns(4)
-                for idx, col in enumerate(detail_columns):
-                    val = row.get(col, "")
-                    if val == "" or pd.isna(val):
-                        val = "N/A"
-                    
-                    with cols_tr[idx % 4]:
-                        st.markdown(f"""
-                        <div class="metric-box infra-asset">
-                            <div class="metric-label">{col}</div>
-                            <div class="metric-value">{val}</div>
-                        </div>
-                        """, unsafe_allow_html=True)
-                        
-                st.markdown("</div>", unsafe_allow_html=True)
-    
-       # ---------------------------------------------------------------
-    # TAB 3 (tab3): OPERATIONS LOUNGE & RUNNING ROOM MANAGEMENT
+            render_metric_grid(
+                fil_df_tr.head(max_cards),
+                '<div class="rail-station-wrapper"><div class="station-title-strip">Point number: <b>{PXING NO.}</b> &nbsp;|&nbsp; Operating Station/Cabin/RRI: <b>{OPERATING STATION}</b></div>',
+                tr_cols
+            )
+
+    # ---------------------------------------------------------------
+    # TAB 3: TRO
     # ---------------------------------------------------------------
     with tab3:
         df_tro = load_secure_sheet("TRO", "NEW_SHEET_NAME_TRO")
-        
         if df_tro.empty:
             st.warning("⚠️ No active crew facility elements found inside the TRO matrix.")
         else:
-            # Match the target structural columns
-            header_identifiers_tro = ["STATION"]
-            detail_columns_tro = [col for col in df_tro.columns if col not in header_identifiers_tro]
+            tro_cols = [c for c in df_tro.columns if c != "STATION"]
             
-            # --- Summary KPIs ---
-            kpi_tro1, kpi_tro2, kpi_tro3 = st.columns(3)
-            with kpi_tro1: 
-                total_lobbies = len(df_tro["Lobby In-charge"].dropna()) if "Lobby In-charge" in df_tro.columns else 0
-                st.metric("🏢 Active Crew Lobbies", f"{total_lobbies} Operational")
-            with kpi_tro2: 
-                total_rooms = len(df_tro["Running Room In-charge"].dropna()) if "Running Room In-charge" in df_tro.columns else 0
-                st.metric("🛏️ Managed Running Rooms", f"{total_rooms} Facilities")
-            st.write("")
+            kpi_tro1, kpi_tro2, _ = st.columns(3)
+            kpi_tro1.st.metric("🏢 Active Crew Lobbies", f"{len(df_tro['Lobby In-charge'].dropna()) if 'Lobby In-charge' in df_tro.columns else 0} Operational")
+            kpi_tro2.st.metric("🛏️ Managed Running Rooms", f"{len(df_tro['Running Room In-charge'].dropna()) if 'Running Room In-charge' in df_tro.columns else 0} Facilities")
             
-            # --- Uniqueized Search Engine ---
-            # KEY CHANGE: Changed key to 'search_tro' to prevent crashing with Tab 2
             search_tro = st.text_input("🔍 Operational Facility Search Desk", placeholder="Type station or personnel name...", key="search_tro")
-            
             fil_df_tro = df_tro.copy()
             if search_tro:
-                # Fast column search vector optimization matching your updated columns
-                search_mask_tro = fil_df_tro["STATION"].astype(str).str.contains(search_tro, case=False, na=False)
+                mask = fil_df_tro["STATION"].astype(str).str.contains(search_tro, case=False, na=False)
+                for opt_col in ["Lobby In-charge", "Running Room In-charge"]:
+                    if opt_col in fil_df_tro.columns:
+                        mask |= fil_df_tro[opt_col].astype(str).str.contains(search_tro, case=False, na=False)
+                fil_df_tro = fil_df_tro[mask]
                 
-                if "Lobby In-charge" in fil_df_tro.columns:
-                    search_mask_tro |= fil_df_tro["Lobby In-charge"].astype(str).str.contains(search_tro, case=False, na=False)
-                if "Running Room In-charge" in fil_df_tro.columns:
-                    search_mask_tro |= fil_df_tro["Running Room In-charge"].astype(str).str.contains(search_tro, case=False, na=False)
-                    
-                fil_df_tro = fil_df_tro[search_mask_tro]
+            if len(fil_df_tro) > max_cards:
+                st.info(f"💡 Showing first {max_cards} of {len(fil_df_tro)} personnel allocations. Refine your query above.")
+                
+            render_metric_grid(
+                fil_df_tro.head(max_cards),
+                '<div class="rail-station-wrapper"><div class="station-title-strip">🚉 Base Station Location: <b>{STATION}</b></div>',
+                tro_cols, col_layout=2
+            )
 
-            # --- Pagination Framework Handling ---
-            # Declaring max_cards locally to guarantee safe fallback processing
-            max_cards_tro = 25
-            total_filtered_tro = len(fil_df_tro)
-            if total_filtered_tro > max_cards_tro:
-                st.info(f"💡 Showing first {max_cards_tro} of {total_filtered_tro} personnel allocations. Refine your query above.")
-                display_df_tro = fil_df_tro.head(max_cards_tro)
-            else:
-                display_df_tro = fil_df_tro
-
-            # --- Grid Render Loop ---
-            for _, row in display_df_tro.iterrows():
-                station_node = row.get("Station", "Unknown Hub")
-                
-                st.markdown(f"""
-                <div class="rail-station-wrapper">
-                    <div class="station-title-strip">
-                        🚉 Base Station Location: <b>{station_node}</b>
-                    </div>
-                """, unsafe_allow_html=True)
-                
-                # Render metrics for remaining tracking metrics (Lobby In-charge, Running Room In-charge)
-                cols_tro = st.columns(2)  # Balanced layout split for two primary target columns
-                for idx, col in enumerate(detail_columns_tro):
-                    val = row.get(col, "")
-                    if val == "" or pd.isna(val):
-                        val = "Not Assigned / Vacant"
-                    
-                    with cols_tro[idx % 2]:
-                        st.markdown(f"""
-                        <div class="metric-box infra-asset">
-                            <div class="metric-label">{col}</div>
-                            <div class="metric-value">{val}</div>
-                        </div>
-                        """, unsafe_allow_html=True)
-                        
-                st.markdown("</div>", unsafe_allow_html=True)
-        # ===============================================================
-    # TAB 4: TRD (TRACTION DISTRIBUTION) OVERVIEW
-    # ===============================================================
+    # ---------------------------------------------------------------
+    # TAB 4: TRD
+    # ---------------------------------------------------------------
     with tab4:
-        # Reuses your core Google Sheet data loader function
         df_trd = load_secure_sheet("SHEET_ID_TRD", "SHEET_NAME_TRD")
-        
         if df_trd.empty:
             st.warning("⚠️ No active Traction Distribution (TRD) data elements found.")
         else:
-            # Isolating primary geographical keys from dynamic attributes
-            header_identifiers_trd = ["STATION", "SECTOR"]
-            detail_columns_trd = [col for col in df_trd.columns if col not in header_identifiers_trd]
+            trd_cols = [c for c in df_trd.columns if c not in ["STATION", "SECTOR"]]
             
-            # --- Summary KPIs ---
             kpi_trd1, kpi_trd2, kpi_trd3 = st.columns(3)
-            with kpi_trd1:
-                total_trd_locs = len(df_trd["STATION"].dropna().unique()) if "STATION" in df_trd.columns else 0
-                st.metric("⚡ TRD Sectors/Stations", f"{total_trd_locs} Monitored")
-            with kpi_trd2:
-                # Attempts a total dynamic equipment count if numeric values exist
-                try:
-                    num_df_trd = df_trd[detail_columns_trd].apply(pd.to_numeric, errors='coerce').fillna(0)
-                    gross_trd_elements = int(num_df_trd.sum().sum())
-                except:
-                    gross_trd_elements = 0
-                st.metric("📦 OHE/PSI Asset Inventory", f"{gross_trd_elements:,} Elements" if gross_trd_elements > 0 else "Active Log")
-            with kpi_trd3:
-                st.metric("🔧 Specialized Asset Classes", f"{len(detail_columns_trd)} Monitored Types")
-                
-            st.write("")
+            kpi_trd1.st.metric("⚡ TRD Sectors/Stations", f"{len(df_trd['STATION'].dropna().unique()) if 'STATION' in df_trd.columns else 0} Monitored")
+            try:
+                gross_trd = int(df_trd[trd_cols].apply(pd.to_numeric, errors='coerce').fillna(0).sum().sum())
+            except: gross_trd = 0
+            kpi_trd2.st.metric("📦 OHE/PSI Asset Inventory", f"{gross_trd:,} Elements" if gross_trd > 0 else "Active Log")
+            kpi_trd3.st.metric("🔧 Specialized Asset Classes", f"{len(trd_cols)} Monitored Types")
             
-            # --- Vectorized Search Desk ---
             search_trd = st.text_input("🔍 TRD Asset Search Desk", placeholder="Type station, sector, or asset name...", key="search_trd")
-            
             fil_df_trd = df_trd.copy()
             if search_trd:
-                search_mask_trd = fil_df_trd["STATION"].astype(str).str.contains(search_trd, case=False, na=False)
+                mask = fil_df_trd["STATION"].astype(str).str.contains(search_trd, case=False, na=False)
                 if "SECTOR" in fil_df_trd.columns:
-                    search_mask_trd |= fil_df_trd["SECTOR"].astype(str).str.contains(search_trd, case=False, na=False)
-                fil_df_trd = fil_df_trd[search_mask_trd]
-
-            # --- Safety Pagination Engine ---
-            max_cards_trd = 25
-            total_filtered_trd = len(fil_df_trd)
-            if total_filtered_trd > max_cards_trd:
-                st.info(f"💡 Showing first {max_cards_trd} of {total_filtered_trd} TRD zones. Refine via search parameters above.")
-                display_df_trd = fil_df_trd.head(max_cards_trd)
-            else:
-                display_df_trd = fil_df_trd
-
-            # --- Optimized CSS Grid Render Loop ---
-            for _, row in display_df_trd.iterrows():
-                station_trd = row.get("TSS", "Unknown Station")
-                sector_trd = f" | Sector: {row.get('SECTOR', 'N/A')}" if "SECTOR" in row else ""
+                    mask |= fil_df_trd["SECTOR"].astype(str).str.contains(search_trd, case=False, na=False)
+                fil_df_trd = fil_df_trd[mask]
                 
-                st.markdown(f"""
-                <div class="rail-station-wrapper">
-                    <div class="station-title-strip">
-                        ⚡ TRD Station Location: <b>{station_trd}</b>{sector_trd}
-                    </div>
-                """, unsafe_allow_html=True)
+            if len(fil_df_trd) > max_cards:
+                st.info(f"💡 Showing first {max_cards} of {len(fil_df_trd)} TRD zones. Refine via search parameters above.")
                 
-                cols_trd = st.columns(4)
-                for idx, col in enumerate(detail_columns_trd):
-                    val = row.get(col, "")
-                    if val == "" or pd.isna(val):
-                        val = "0"
-                        
-                    with cols_trd[idx % 4]:
-                        st.markdown(f"""
-                        <div class="metric-box infra-asset">
-                            <div class="metric-label">{col}</div>
-                            <div class="metric-value">{val}</div>
-                        </div>
-                        """, unsafe_allow_html=True)
-                        
-                st.markdown("</div>", unsafe_allow_html=True)
+            for _, row in fil_df_trd.head(max_cards).iterrows():
+                sec_str = f" | Sector: {row['SECTOR']}" if ("SECTOR" in row and pd.notna(row['SECTOR'])) else ""
+                title_html = f'<div class="rail-station-wrapper"><div class="station-title-strip">⚡ TRD Station Location: <b>{row.get("STATION", "Unknown Station")}</b>{sec_str}</div>'
+                render_metric_grid(pd.DataFrame([row]), title_html, trd_cols)
 
-# ===============================================================
-    # TAB 5: LC (LEVEL CROSSING) GATES MANAGEMENT
-    # ===============================================================
+    # ---------------------------------------------------------------
+    # TAB 5: LC GATES
+    # ---------------------------------------------------------------
     with tab5:
-        # Reuses your core Google Sheet data loader function
         df_lc = load_secure_sheet("SHEET_ID_LC", "SHEET_NAME_LC")
-        
         if df_lc.empty:
             st.warning("⚠️ No active Level Crossing (LC) Gate structural elements found.")
         else:
-            # Map explicit identifiers to match your Google Sheet columns
-            header_identifiers_lc = ["LC Gate", "Section"]
-            detail_columns_lc = [col for col in df_lc.columns if col not in header_identifiers_lc]
+            lc_cols = [c for c in df_lc.columns if c not in ["LC Gate", "Section"]]
             
-            # --- Summary KPIs ---
             kpi_lc1, kpi_lc2, kpi_lc3 = st.columns(3)
-            with kpi_lc1:
-                st.metric("🚧 Total Managed Crossings", f"{len(df_lc)} Gates")
-            with kpi_lc2:
-                # Dynamically maps unique sections or controlling hubs
-                inter_st = len(df_lc["Section"].dropna().unique()) if "Section" in df_lc.columns else 0
-                st.metric("📍 Monitored Sections", f"{inter_st} Route Zones")
-            with kpi_lc3:
-                # Captures the overall classification/operational split count
-                ops_types = len(df_lc["Operated by"].dropna().unique()) if "Operated by" in df_lc.columns else 0
-                st.metric("⚙️ Operations Staffing", f"{ops_types} Handlers")
-                
-            st.write("")
+            kpi_lc1.st.metric("🚧 Total Managed Crossings", f"{len(df_lc)} Gates")
+            kpi_lc2.st.metric("📍 Monitored Sections", f"{len(df_lc['Section'].dropna().unique()) if 'Section' in df_lc.columns else 0} Route Zones")
+            kpi_lc3.st.metric("⚙️ Operations Staffing", f"{len(df_lc['Operated by'].dropna().unique()) if 'Operated by' in df_lc.columns else 0} Handlers")
             
-            # --- Vectorized Search Desk ---
             search_lc = st.text_input("🔍 Level Crossing Attribute Search Desk", placeholder="Type LC gate number or route section...", key="search_lc")
-            
             fil_df_lc = df_lc.copy()
             if search_lc:
-                # Vectorized fallback targeting your core parameters
-                search_mask_lc = fil_df_lc["LC Gate"].astype(str).str.contains(search_lc, case=False, na=False)
+                mask = fil_df_lc["LC Gate"].astype(str).str.contains(search_lc, case=False, na=False)
                 if "Section" in fil_df_lc.columns:
-                    search_mask_lc |= fil_df_lc["Section"].astype(str).str.contains(search_lc, case=False, na=False)
-                fil_df_lc = fil_df_lc[search_mask_lc]
-
-            # --- Safety Pagination Engine ---
-            max_cards_lc = 25
-            total_filtered_lc = len(fil_df_lc)
-            if total_filtered_lc > max_cards_lc:
-                st.info(f"💡 Showing first {max_cards_lc} of {total_filtered_lc} LC configurations. Refine search criteria above.")
-                display_df_lc = fil_df_lc.head(max_cards_lc)
-            else:
-                display_df_lc = fil_df_lc
-
-            # --- Optimized CSS Grid Render Loop ---
-            for _, row in display_df_lc.iterrows():
-                lc_name = row.get("LC Gate", "N/A")
-                route_section = row.get("Section", "Unknown Section")
+                    mask |= fil_df_lc["Section"].astype(str).str.contains(search_lc, case=False, na=False)
+                fil_df_lc = fil_df_lc[mask]
                 
-                st.markdown(f"""
-                <div class="rail-station-wrapper">
-                    <div class="station-title-strip">
-                        🚧 Level Crossing (LC) Gate: <b>{lc_name}</b> &nbsp;|&nbsp; Section: <b>{route_section}</b>
-                    </div>
-                """, unsafe_allow_html=True)
+            if len(fil_df_lc) > max_cards:
+                st.info(f"💡 Showing first {max_cards} of {len(fil_df_lc)} LC configurations. Refine search criteria above.")
                 
-                cols_lc = st.columns(4)
-                for idx, col in enumerate(detail_columns_lc):
-                    val = row.get(col, "")
-                    if val == "" or pd.isna(val):
-                        val = "N/A"
-                        
-                    with cols_lc[idx % 4]:
-                        st.markdown(f"""
-                        <div class="metric-box infra-asset">
-                            <div class="metric-label">{col}</div>
-                            <div class="metric-value">{val}</div>
-                        </div>
-                        """, unsafe_allow_html=True)
-                        
-                st.markdown("</div>", unsafe_allow_html=True)
+            render_metric_grid(
+                fil_df_lc.head(max_cards),
+                '<div class="rail-station-wrapper"><div class="station-title-strip">🚧 Level Crossing (LC) Gate: <b>{LC Gate}</b> &nbsp;|&nbsp; Section: <b>{Section}</b></div>',
+                lc_cols
+            )
+
 if __name__ == "__main__":
     main_portal()
