@@ -10,6 +10,10 @@ import io
 from docx import Document
 from docx.shared import Inches
 
+# Openpyxl formatting tools for the professional Excel engine
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from openpyxl.utils import get_column_letter
+
 # ====================== PAGE CONFIG ======================
 st.set_page_config(
     page_title="Solapur Division Equipment Management System",
@@ -58,7 +62,7 @@ html, body, [class*="css"] { font-family: "Segoe UI", -apple-system, BlinkMacSys
 .metric-value.zero { color: #94a3b8 !important; font-weight: 600; }
 .export-panel { background: #f1f5f9; padding: 15px; border-radius: 8px; border: 1px solid #cbd5e1; margin-top: 10px; margin-bottom: 20px;}
 
-/* MOBILE-RESPONSIVE VIEWPORT ENGINE (POINT 5) */
+/* MOBILE-RESPONSIVE VIEWPORT ENGINE */
 @media (max-width: 768px) {
     .block-container {
         padding-left: 0.5rem !important;
@@ -123,7 +127,7 @@ def login():
 if not login():
     st.stop()
 
-# ====================== RESILIENT DATA PIPELINE ENGINE (POINT 5) ======================
+# ====================== RESILIENT DATA PIPELINE ENGINE ======================
 @st.cache_data(ttl=600, show_spinner="Fetching Data Matrix...")
 def fetch_from_google(sheet_id_key, sheet_name_key):
     """Direct network connection layer to Cloud Database."""
@@ -140,19 +144,13 @@ def load_secure_sheet(sheet_id_key, sheet_name_key):
     backup_key = f"backup_{sheet_id_key}_{sheet_name_key}"
     
     try:
-        # Request fresh data (or pull straight from Streamlit cache memory if inside TTL window)
         df = fetch_from_google(sheet_id_key, sheet_name_key)
-        
-        # Commit a copy to session memory state as the ultimate network loss fallback
         st.session_state[backup_key] = df
         return df
-        
     except Exception:
-        # Network signal is lost! Check if an offline session backup exists
         if backup_key in st.session_state:
             return st.session_state[backup_key]
         else:
-            # Absolute worst-case scenario: No internet and no prior cached memory
             st.error("🚨 Connection failure. No offline cached data found yet for this department.")
             return pd.DataFrame()
 
@@ -253,11 +251,59 @@ def render_export_desk(df, prefix_name):
         st.write("") 
         st.write("") 
         
-        # 1. EXCEL DOCUMENT ENGINE
+        # 1. EXCEL DOCUMENT ENGINE (WITH PROFESSIONAL CORPORATE FORMATTING STYLE)
         if "Excel" in format_choice:
             buffer = io.BytesIO()
             with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
                 df.to_excel(writer, index=False, sheet_name="Asset Inventory Log")
+                
+                # Snag a reference handle on the active openpyxl worksheet structure
+                workbook = writer.book
+                worksheet = workbook["Asset Inventory Log"]
+                worksheet.views.sheetView[0].showGridLines = True
+                
+                # Define specific structural themes for styles
+                header_font = Font(name="Segoe UI", size=11, bold=True, color="FFFFFF")
+                header_fill = PatternFill(start_color="1E3A8A", end_color="1E3A8A", fill_type="solid") # Deep Corporate Navy
+                data_font = Font(name="Segoe UI", size=10, bold=False, color="000000")
+                zebra_fill = PatternFill(start_color="F1F5F9", end_color="F1F5F9", fill_type="solid") # Slate Accent Row tint
+                
+                thin_side = Side(border_style="thin", color="CBD5E1")
+                cell_border = Border(left=thin_side, right=thin_side, top=thin_side, bottom=thin_side)
+                center_align = Alignment(horizontal="center", vertical="center")
+                left_align = Alignment(horizontal="left", vertical="center")
+                
+                # Format Header Row
+                for cell in worksheet[1]:
+                    cell.font = header_font
+                    cell.fill = header_fill
+                    cell.alignment = center_align
+                    cell.border = cell_border
+                worksheet.row_dimensions[1].height = 26
+                
+                # Format Data Rows
+                for row_idx, row in enumerate(worksheet.iter_rows(min_row=2, max_row=worksheet.max_row, min_col=1, max_col=worksheet.max_column), start=2):
+                    worksheet.row_dimensions[row_idx].height = 20
+                    is_even = (row_idx % 2 == 0)
+                    
+                    for cell in row:
+                        cell.font = data_font
+                        cell.border = cell_border
+                        # Apply zebra striping rows
+                        if is_even:
+                            cell.fill = zebra_fill
+                        # Align based on content type
+                        if isinstance(cell.value, (int, float)):
+                            cell.alignment = center_align
+                        else:
+                            cell.alignment = left_align
+
+                # Dynamically calculate and inject explicit column widths to prevent cut-off values
+                for col in worksheet.columns:
+                    max_len = max(len(str(cell.value or '')) for cell in col)
+                    col_letter = get_column_letter(col[0].column)
+                    worksheet.column_dimensions[col_letter].width = max(max_len + 4, 12)
+                    
             st.download_button(
                 label="📥 Save File as Complete Excel Document",
                 data=buffer.getvalue(),
