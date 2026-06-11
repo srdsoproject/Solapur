@@ -96,7 +96,6 @@ def load_secure_sheet(sheet_id_key, sheet_name_key):
             scopes=["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
         )
         df = pd.DataFrame(gspread.authorize(creds).open_by_key(st.secrets[sheet_id_key]).worksheet(st.secrets[sheet_name_key]).get_all_records())
-        # Strip trailing/leading white space cleanly from headers
         df.columns = df.columns.str.strip()
         return df
     except Exception:
@@ -105,21 +104,16 @@ def load_secure_sheet(sheet_id_key, sheet_name_key):
 
 # ====================== AUTOMATED DYNAMIC GRID COMPONENT ======================
 def render_dynamic_grid(df, icon_emoji="📦", col_layout=4, is_inventory=False):
-    """Automatically extracts all headers from the sheet. 
-    Uses the 1st column as the layout strip title, and renders everything else as dynamic subcards."""
     if df.empty:
         return
         
     all_headers = list(df.columns)
-    title_column = all_headers[0]  # First column dynamically acts as the card identifier
-    
-    # Detail columns are all remaining headers (ignoring GIS coords to avoid cluttering cards)
+    title_column = all_headers[0]  
     detail_cols = [c for c in all_headers if c not in [title_column, "LATITUDE", "LONGITUDE"]]
     
     for _, row in df.iterrows():
         title_value = row.get(title_column, "Unknown Node")
         
-        # Build the HTML title bar anchor dynamically using the first sheet column
         st.markdown(f"""
         <div class="rail-station-wrapper">
             <div class="station-title-strip">{icon_emoji} {title_column}: <b>{title_value}</b></div>
@@ -130,7 +124,6 @@ def render_dynamic_grid(df, icon_emoji="📦", col_layout=4, is_inventory=False)
             raw = row.get(col, 0 if is_inventory else "N/A")
             val = "N/A" if (pd.isna(raw) or raw == "") else raw
             
-            # CSS UI Selector engine
             if is_inventory:
                 try: val = int(float(raw)) if raw != "" and not pd.isna(raw) else 0
                 except: val = raw
@@ -155,6 +148,38 @@ def render_dynamic_grid(df, icon_emoji="📦", col_layout=4, is_inventory=False)
                 """, unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
 
+# ====================== PAGINATION HELPER FUNCTION ======================
+def handle_pagination(key_prefix, total_items, items_per_page):
+    """Creates navigation engine controls for changing rows slices."""
+    page_key = f"{key_prefix}_page"
+    if page_key not in st.session_state:
+        st.session_state[page_key] = 0
+
+    total_pages = max(1, (total_items + items_per_page - 1) // items_per_page)
+    
+    # Auto-adjust bounds if search criteria makes the active page index out of bounds
+    if st.session_state[page_key] >= total_pages:
+        st.session_state[page_key] = total_pages - 1
+
+    col_p1, col_p2, col_p3 = st.columns([1, 2, 1])
+    
+    with col_p1:
+        if st.button("⬅️ Previous", key=f"{key_prefix}_prev", disabled=(st.session_state[page_key] == 0), use_container_width=True):
+            st.session_state[page_key] -= 1
+            st.rerun()
+            
+    with col_p2:
+        st.markdown(f"<p style='text-align: center; font-weight: 600; padding-top:6px; color: #1e3a8a;'>Page {st.session_state[page_key] + 1} of {total_pages} (Total: {total_items} rows)</p>", unsafe_allow_html=True)
+        
+    with col_p3:
+        if st.button("Next ➡️", key=f"{key_prefix}_next", disabled=(st.session_state[page_key] >= total_pages - 1), use_container_width=True):
+            st.session_state[page_key] += 1
+            st.rerun()
+
+    start_idx = st.session_state[page_key] * items_per_page
+    end_idx = start_idx + items_per_page
+    return start_idx, end_idx
+
 # ====================== APPLICATION MAIN CORE ======================
 def main_portal():
     st.markdown("""
@@ -170,9 +195,13 @@ def main_portal():
     
     if st.sidebar.button("🔄 Sync Google Sheets & Clear Cache", use_container_width=True):
         load_secure_sheet.clear()
+        # Clear pagination settings on hard sync
+        for key in list(st.session_state.keys()):
+            if "_page" in key:
+                st.session_state[key] = 0
         st.rerun()
     if st.sidebar.button("🚪 Terminate Session", use_container_width=True):
-        st.session_state.authenticated = False
+        st.session_state.clear()
         st.rerun()
 
     tab1, tab2, tab3, tab4, tab5 = st.tabs(["🚞 Operating", "🛠️ Engineering", "👨‍✈️ TRO", "⚡ TRD", "🚧 LC Gates"])
@@ -212,10 +241,9 @@ def main_portal():
             search_eq = st.text_input("🔍 Operational Search Desk Filter", placeholder=f"Search by {first_col}...", key="search_eq")
             fil_df = df_eq[df_eq[first_col].astype(str).str.contains(search_eq, case=False, na=False)] if search_eq else df_eq
             
-            if len(fil_df) > max_cards:
-                st.info(f"💡 Showing first {max_cards} of {len(fil_df)} rows. Refine search above.")
-            
-            render_dynamic_grid(fil_df.head(max_cards), icon_emoji="🚞", is_inventory=True)
+            # Pagination Engine integration
+            start, end = handle_pagination("operating", len(fil_df), max_cards)
+            render_dynamic_grid(fil_df.iloc[start:end], icon_emoji="🚞", is_inventory=True)
 
     # ---------------------------------------------------------------
     # TAB 2: ENGINEERING
@@ -235,10 +263,9 @@ def main_portal():
             if search_tr:
                 fil_df_tr = fil_df_tr[fil_df_tr[first_col].astype(str).str.contains(search_tr, case=False, na=False)]
                 
-            if len(fil_df_tr) > max_cards:
-                st.info(f"💡 Showing first {max_cards} lines. Refine search parameters above.")
-                
-            render_dynamic_grid(fil_df_tr.head(max_cards), icon_emoji="🛠️")
+            # Pagination Engine integration
+            start, end = handle_pagination("engineering", len(fil_df_tr), max_cards)
+            render_dynamic_grid(fil_df_tr.iloc[start:end], icon_emoji="🛠️")
 
     # ---------------------------------------------------------------
     # TAB 3: TRO
@@ -258,10 +285,9 @@ def main_portal():
             if search_tro:
                 fil_df_tro = fil_df_tro[fil_df_tro[first_col].astype(str).str.contains(search_tro, case=False, na=False)]
                 
-            if len(fil_df_tro) > max_cards:
-                st.info(f"💡 Showing first {max_cards} configurations. Refine your query above.")
-                
-            render_dynamic_grid(fil_df_tro.head(max_cards), icon_emoji="👨‍✈️", col_layout=2)
+            # Pagination Engine integration
+            start, end = handle_pagination("tro", len(fil_df_tro), max_cards)
+            render_dynamic_grid(fil_df_tro.iloc[start:end], icon_emoji="👨‍✈️", col_layout=2)
 
     # ---------------------------------------------------------------
     # TAB 4: TRD
@@ -281,10 +307,9 @@ def main_portal():
             if search_trd:
                 fil_df_trd = fil_df_trd[fil_df_trd[first_col].astype(str).str.contains(search_trd, case=False, na=False)]
                 
-            if len(fil_df_trd) > max_cards:
-                st.info(f"💡 Showing first {max_cards} zones. Refine via search parameters above.")
-                
-            render_dynamic_grid(fil_df_trd.head(max_cards), icon_emoji="⚡")
+            # Pagination Engine integration
+            start, end = handle_pagination("trd", len(fil_df_trd), max_cards)
+            render_dynamic_grid(fil_df_trd.iloc[start:end], icon_emoji="⚡")
 
     # ---------------------------------------------------------------
     # TAB 5: LC GATES
@@ -304,10 +329,9 @@ def main_portal():
             if search_lc:
                 fil_df_lc = fil_df_lc[fil_df_lc[first_col].astype(str).str.contains(search_lc, case=False, na=False)]
                 
-            if len(fil_df_lc) > max_cards:
-                st.info(f"💡 Showing first {max_cards} configurations. Refine search criteria above.")
-                
-            render_dynamic_grid(fil_df_lc.head(max_cards), icon_emoji="🚧")
+            # Pagination Engine integration
+            start, end = handle_pagination("lc_gates", len(fil_df_lc), max_cards)
+            render_dynamic_grid(fil_df_lc.iloc[start:end], icon_emoji="🚧")
 
 if __name__ == "__main__":
     main_portal()
