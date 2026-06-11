@@ -4,6 +4,11 @@ import gspread
 from google.oauth2.service_account import Credentials
 import folium
 from streamlit_folium import st_folium
+import io
+
+# Extra professional formatting imports
+from docx import Document
+from docx.shared import Inches
 
 # ====================== PAGE CONFIG ======================
 st.set_page_config(
@@ -51,6 +56,7 @@ html, body, [class*="css"] { font-family: "Segoe UI", -apple-system, BlinkMacSys
 .metric-label { color: #334155 !important; font-size: 14px !important; font-weight: 600 !important; text-transform: capitalize; text-align: center; line-height: 1.3; margin: 0; }
 .metric-value { color: #1e3a8a !important; font-size: 17px !important; font-weight: 700 !important; margin: 0; }
 .metric-value.zero { color: #94a3b8 !important; font-weight: 600; }
+.export-panel { background: #f1f5f9; padding: 15px; border-radius: 8px; border: 1px solid #cbd5e1; margin-top: 10px; margin-bottom: 20px;}
 </style>
 """, unsafe_allow_html=True)
 
@@ -177,6 +183,114 @@ def handle_pagination(key_prefix, total_items, items_per_page):
     end_idx = start_idx + items_per_page
     return start_idx, end_idx
 
+
+# ====================== ADVANCED EXPORT ENGINE ======================
+def render_export_desk(df, prefix_name):
+    """Renders a comprehensive, multi-format file generation suite directly onto the UI."""
+    if df.empty:
+        return
+
+    st.markdown("""<div class="export-panel">💾 <b>System Document & Export Desk</b></div>""", unsafe_allow_html=True)
+    
+    base_filename = f"Solapur_Division_{prefix_name.replace(' ', '_')}_Report"
+    
+    col_f1, col_f2 = st.columns([1, 2])
+    
+    with col_f1:
+        format_choice = st.selectbox(
+            "Select Target Output Format:",
+            ["Excel Worksheets (.xlsx)", "Word Document (.docx)", "CSV Matrix (.csv)", "Printable Report Summary (PDF / HTML)"],
+            key=f"format_{prefix_name}"
+        )
+        
+    with col_f2:
+        st.write("") # Padding alignment
+        st.write("") 
+        
+        # 1. EXCEL WORKBOOK GENERATOR
+        if "Excel" in format_choice:
+            buffer = io.BytesIO()
+            with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
+                df.to_excel(writer, index=False, sheet_name="Asset Inventory Log")
+            st.download_button(
+                label="📥 Save File as Complete Excel Document",
+                data=buffer.getvalue(),
+                file_name=f"{base_filename}.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                use_container_width=True
+            )
+            
+        # 2. MS WORD DOCUMENT GENERATOR
+        elif "Word" in format_choice:
+            doc = Document()
+            doc.add_heading(f"Solapur Division Asset Inventory Report - {prefix_name}", level=1)
+            doc.add_paragraph("Generated dynamically via Safety & Engineering Branch Management Portal.")
+            
+            # Simple conversion to structural table
+            t = doc.add_table(rows=1, cols=len(df.columns))
+            t.style = 'Light Shading Accent 1'
+            hdr_cells = t.rows[0].cells
+            for i, col_name in enumerate(df.columns):
+                hdr_cells[i].text = str(col_name)
+                
+            for _, row in df.head(100).iterrows(): # Limit word row generation block for clean pacing
+                row_cells = t.add_row().cells
+                for i, val in enumerate(row):
+                    row_cells[i].text = str(val)
+                    
+            buffer = io.BytesIO()
+            doc.save(buffer)
+            st.download_button(
+                label="📥 Save File as Microsoft Word Narrative Report",
+                data=buffer.getvalue(),
+                file_name=f"{base_filename}.docx",
+                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                use_container_width=True
+            )
+            
+        # 3. STANDARD CSV
+        elif "CSV" in format_choice:
+            csv_bytes = df.to_csv(index=False).encode('utf-8')
+            st.download_button(
+                label="📥 Save File as Plain Text CSV Matrix",
+                data=csv_bytes,
+                file_name=f"{base_filename}.csv",
+                mime="text/csv",
+                use_container_width=True
+            )
+            
+        # 4. PRINT TO PDF / HTML OVERVIEW
+        elif "Printable" in format_choice:
+            html_table = df.to_html(index=False, classes='table table-striped')
+            html_blob = f"""
+            <html>
+            <head>
+                <style>
+                    body {{ font-family: Arial, sans-serif; margin: 30px; }}
+                    h2 {{ color: #1e3a8a; }}
+                    table {{ width: 100%; border-collapse: collapse; margin-top: 20px; }}
+                    th {{ background-color: #0369a1; color: white; padding: 10px; text-align: left; }}
+                    td {{ padding: 8px; border: 1px solid #cbd5e1; }}
+                    tr:nth-child(even) {{ background-color: #f8fafc; }}
+                </style>
+            </head>
+            <body>
+                <h2>🚉 Solapur Division - {prefix_name} Structural Logs</h2>
+                <p>Official Safety Desk Output Log. Press <b>Ctrl + P</b> to save directly as an official corporate PDF format profile.</p>
+                {html_table}
+            </body>
+            </html>
+            """
+            st.download_button(
+                label="📥 Save File as Web Report / PDF (Open HTML & Press Ctrl+P)",
+                data=html_blob.encode('utf-8'),
+                file_name=f"{base_filename}.html",
+                mime="text/html",
+                use_container_width=True
+            )
+    st.markdown("---")
+
+
 # ====================== APPLICATION MAIN CORE ======================
 def main_portal():
     st.markdown("""
@@ -254,6 +368,8 @@ def main_portal():
             search_eq = st.text_input("🔍 Operational Search Desk Filter", placeholder=f"Search by {first_col}...", key="search_eq")
             fil_df = df_eq[df_eq[first_col].astype(str).str.contains(search_eq, case=False, na=False)] if search_eq else df_eq
             
+            # Export and Pagination integration
+            render_export_desk(fil_df, "Operating")
             start, end = handle_pagination("operating", len(fil_df), max_cards)
             render_dynamic_grid(fil_df.iloc[start:end], icon_emoji="🚞", is_inventory=True)
 
@@ -276,6 +392,7 @@ def main_portal():
             if search_tr:
                 fil_df_tr = fil_df_tr[fil_df_tr[first_col].astype(str).str.contains(search_tr, case=False, na=False)]
                 
+            render_export_desk(fil_df_tr, "Engineering")
             start, end = handle_pagination("engineering", len(fil_df_tr), max_cards)
             render_dynamic_grid(fil_df_tr.iloc[start:end], icon_emoji="🛠️")
 
@@ -298,6 +415,7 @@ def main_portal():
             if search_tro:
                 fil_df_tro = fil_df_tro[fil_df_tro[first_col].astype(str).str.contains(search_tro, case=False, na=False)]
                 
+            render_export_desk(fil_df_tro, "TRO")
             start, end = handle_pagination("tro", len(fil_df_tro), max_cards)
             render_dynamic_grid(fil_df_tro.iloc[start:end], icon_emoji="👨‍✈️", col_layout=2)
 
@@ -320,6 +438,7 @@ def main_portal():
             if search_trd:
                 fil_df_trd = fil_df_trd[fil_df_trd[first_col].astype(str).str.contains(search_trd, case=False, na=False)]
                 
+            render_export_desk(fil_df_trd, "TRD")
             start, end = handle_pagination("trd", len(fil_df_trd), max_cards)
             render_dynamic_grid(fil_df_trd.iloc[start:end], icon_emoji="⚡")
 
@@ -342,6 +461,7 @@ def main_portal():
             if search_lc:
                 fil_df_lc = fil_df_lc[fil_df_lc[first_col].astype(str).str.contains(search_lc, case=False, na=False)]
                 
+            render_export_desk(fil_df_lc, "LC_Gates")
             start, end = handle_pagination("lc_gates", len(fil_df_lc), max_cards)
             render_dynamic_grid(fil_df_lc.iloc[start:end], icon_emoji="🚧")
 
