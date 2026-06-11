@@ -57,6 +57,37 @@ html, body, [class*="css"] { font-family: "Segoe UI", -apple-system, BlinkMacSys
 .metric-value { color: #1e3a8a !important; font-size: 17px !important; font-weight: 700 !important; margin: 0; }
 .metric-value.zero { color: #94a3b8 !important; font-weight: 600; }
 .export-panel { background: #f1f5f9; padding: 15px; border-radius: 8px; border: 1px solid #cbd5e1; margin-top: 10px; margin-bottom: 20px;}
+
+/* MOBILE-RESPONSIVE VIEWPORT ENGINE (POINT 5) */
+@media (max-width: 768px) {
+    .block-container {
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+        padding-top: 0.5rem !important;
+    }
+    .header-box {
+        padding: 18px 20px !important;
+        margin-bottom: 15px !important;
+    }
+    .header-box h1 {
+        font-size: 22px !important;
+        line-height: 1.2;
+    }
+    .header-box h4 {
+        font-size: 13px !important;
+    }
+    .rail-station-wrapper {
+        padding: 12px !important;
+        margin-bottom: 15px !important;
+    }
+    .station-title-strip {
+        font-size: 16px !important;
+        margin-bottom: 12px !important;
+    }
+    [data-testid="stHorizontalBlock"] {
+        gap: 8px !important;
+    }
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -92,20 +123,38 @@ def login():
 if not login():
     st.stop()
 
-# ====================== DATA PIPELINE ENGINE ======================
-@st.cache_data(ttl=300, show_spinner="Fetching Data Matrix...")
+# ====================== RESILIENT DATA PIPELINE ENGINE (POINT 5) ======================
+@st.cache_data(ttl=600, show_spinner="Fetching Data Matrix...")
+def fetch_from_google(sheet_id_key, sheet_name_key):
+    """Direct network connection layer to Cloud Database."""
+    creds = Credentials.from_service_account_info(
+        st.secrets["gcp_service_account"],
+        scopes=["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
+    )
+    df = pd.DataFrame(gspread.authorize(creds).open_by_key(st.secrets[sheet_id_key]).worksheet(st.secrets[sheet_name_key]).get_all_records())
+    df.columns = df.columns.str.strip()
+    return df
+
 def load_secure_sheet(sheet_id_key, sheet_name_key):
+    """Smart cache-first manager with an un-crashable network fallback pipeline."""
+    backup_key = f"backup_{sheet_id_key}_{sheet_name_key}"
+    
     try:
-        creds = Credentials.from_service_account_info(
-            st.secrets["gcp_service_account"],
-            scopes=["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
-        )
-        df = pd.DataFrame(gspread.authorize(creds).open_by_key(st.secrets[sheet_id_key]).worksheet(st.secrets[sheet_name_key]).get_all_records())
-        df.columns = df.columns.str.strip()
+        # Request fresh data (or pull straight from Streamlit cache memory if inside TTL window)
+        df = fetch_from_google(sheet_id_key, sheet_name_key)
+        
+        # Commit a copy to session memory state as the ultimate network loss fallback
+        st.session_state[backup_key] = df
         return df
+        
     except Exception:
-        st.error(f"🚨 Connection to Cloud Target matrix rejected.")
-        return pd.DataFrame()
+        # Network signal is lost! Check if an offline session backup exists
+        if backup_key in st.session_state:
+            return st.session_state[backup_key]
+        else:
+            # Absolute worst-case scenario: No internet and no prior cached memory
+            st.error("🚨 Connection failure. No offline cached data found yet for this department.")
+            return pd.DataFrame()
 
 # ====================== AUTOMATED DYNAMIC GRID COMPONENT ======================
 def render_dynamic_grid(df, icon_emoji="📦", col_layout=4, is_inventory=False):
@@ -183,19 +232,16 @@ def handle_pagination(key_prefix, total_items, items_per_page):
     end_idx = start_idx + items_per_page
     return start_idx, end_idx
 
-
-# ====================== ADVANCED EXPORT ENGINE ======================
+# ====================== ADVANCED MULTI-FORMAT EXPORT ENGINE ======================
 def render_export_desk(df, prefix_name):
-    """Renders a comprehensive, multi-format file generation suite directly onto the UI."""
+    """Renders an intuitive, robust data exportation dashboard module component."""
     if df.empty:
         return
 
     st.markdown("""<div class="export-panel">💾 <b>System Document & Export Desk</b></div>""", unsafe_allow_html=True)
-    
     base_filename = f"Solapur_Division_{prefix_name.replace(' ', '_')}_Report"
     
     col_f1, col_f2 = st.columns([1, 2])
-    
     with col_f1:
         format_choice = st.selectbox(
             "Select Target Output Format:",
@@ -204,10 +250,10 @@ def render_export_desk(df, prefix_name):
         )
         
     with col_f2:
-        st.write("") # Padding alignment
+        st.write("") 
         st.write("") 
         
-        # 1. EXCEL WORKBOOK GENERATOR
+        # 1. EXCEL DOCUMENT ENGINE
         if "Excel" in format_choice:
             buffer = io.BytesIO()
             with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
@@ -220,20 +266,19 @@ def render_export_desk(df, prefix_name):
                 use_container_width=True
             )
             
-        # 2. MS WORD DOCUMENT GENERATOR
+        # 2. WORD NARRATIVE ENGINE
         elif "Word" in format_choice:
             doc = Document()
             doc.add_heading(f"Solapur Division Asset Inventory Report - {prefix_name}", level=1)
             doc.add_paragraph("Generated dynamically via Safety & Engineering Branch Management Portal.")
             
-            # Simple conversion to structural table
             t = doc.add_table(rows=1, cols=len(df.columns))
             t.style = 'Light Shading Accent 1'
             hdr_cells = t.rows[0].cells
             for i, col_name in enumerate(df.columns):
                 hdr_cells[i].text = str(col_name)
                 
-            for _, row in df.head(100).iterrows(): # Limit word row generation block for clean pacing
+            for _, row in df.head(100).iterrows(): 
                 row_cells = t.add_row().cells
                 for i, val in enumerate(row):
                     row_cells[i].text = str(val)
@@ -248,7 +293,7 @@ def render_export_desk(df, prefix_name):
                 use_container_width=True
             )
             
-        # 3. STANDARD CSV
+        # 3. CSV ENGINE
         elif "CSV" in format_choice:
             csv_bytes = df.to_csv(index=False).encode('utf-8')
             st.download_button(
@@ -259,7 +304,7 @@ def render_export_desk(df, prefix_name):
                 use_container_width=True
             )
             
-        # 4. PRINT TO PDF / HTML OVERVIEW
+        # 4. PRINT REPORT OVERVIEW (FOR PDF GENERATION VIA CTRL+P)
         elif "Printable" in format_choice:
             html_table = df.to_html(index=False, classes='table table-striped')
             html_blob = f"""
@@ -290,7 +335,6 @@ def render_export_desk(df, prefix_name):
             )
     st.markdown("---")
 
-
 # ====================== APPLICATION MAIN CORE ======================
 def main_portal():
     st.markdown("""
@@ -302,10 +346,10 @@ def main_portal():
 
     # --- Sidebar Console Operations ---
     st.sidebar.markdown("### 🖥️ Controller Desk")
-    st.sidebar.caption("Google Sheet: Connected")
+    st.sidebar.caption("Google Sheet status: Connected")
     
     if st.sidebar.button("🔄 Sync Google Sheets & Clear Cache", use_container_width=True):
-        load_secure_sheet.clear()
+        fetch_from_google.clear()
         for key in list(st.session_state.keys()):
             if "_page" in key:
                 st.session_state[key] = 0
@@ -368,7 +412,6 @@ def main_portal():
             search_eq = st.text_input("🔍 Operational Search Desk Filter", placeholder=f"Search by {first_col}...", key="search_eq")
             fil_df = df_eq[df_eq[first_col].astype(str).str.contains(search_eq, case=False, na=False)] if search_eq else df_eq
             
-            # Export and Pagination integration
             render_export_desk(fil_df, "Operating")
             start, end = handle_pagination("operating", len(fil_df), max_cards)
             render_dynamic_grid(fil_df.iloc[start:end], icon_emoji="🚞", is_inventory=True)
