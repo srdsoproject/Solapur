@@ -11,3 +11,5 @@ google-auth
 pandas
 folium
 streamlit-folium
+openpyxl
+python-docx
