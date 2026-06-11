@@ -5,6 +5,7 @@ from google.oauth2.service_account import Credentials
 import folium
 from streamlit_folium import st_folium
 import io
+import urllib.parse  # Built-in library to safely format strings for URLs
 
 # Extra professional formatting imports
 from docx import Document
@@ -61,6 +62,28 @@ html, body, [class*="css"] { font-family: "Segoe UI", -apple-system, BlinkMacSys
 .metric-value { color: #1e3a8a !important; font-size: 17px !important; font-weight: 700 !important; margin: 0; }
 .metric-value.zero { color: #94a3b8 !important; font-weight: 600; }
 .export-panel { background: #f1f5f9; padding: 15px; border-radius: 8px; border: 1px solid #cbd5e1; margin-top: 10px; margin-bottom: 20px;}
+
+/* Custom styled professional link-button for WhatsApp sharing */
+.whatsapp-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #25D366;
+    color: white !important;
+    font-weight: 600;
+    font-size: 13px;
+    padding: 8px 16px;
+    border-radius: 6px;
+    text-decoration: none;
+    margin-top: 15px;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+}
+.whatsapp-btn:hover {
+    background-color: #128C7E;
+    transform: translateY(-1px);
+}
 
 /* MOBILE-RESPONSIVE VIEWPORT ENGINE */
 @media (max-width: 768px) {
@@ -166,15 +189,22 @@ def render_dynamic_grid(df, icon_emoji="📦", col_layout=4, is_inventory=False)
     for _, row in df.iterrows():
         title_value = row.get(title_column, "Unknown Node")
         
+        # Open parent station card block
         st.markdown(f"""
         <div class="rail-station-wrapper">
             <div class="station-title-strip">{icon_emoji} {title_column}: <b>{title_value}</b></div>
         """, unsafe_allow_html=True)
         
+        # Build individual metric display blocks inside grid rows
         cols = st.columns(col_layout)
+        whatsapp_body_segments = []
+        
         for idx, col in enumerate(detail_cols):
             raw = row.get(col, 0 if is_inventory else "N/A")
             val = "N/A" if (pd.isna(raw) or raw == "") else raw
+            
+            # Construct clear text fields for the WhatsApp text payload structure
+            whatsapp_body_segments.append(f"• {col}: {val}")
             
             if is_inventory:
                 try: val = int(float(raw)) if raw != "" and not pd.isna(raw) else 0
@@ -198,7 +228,32 @@ def render_dynamic_grid(df, icon_emoji="📦", col_layout=4, is_inventory=False)
                     <div class="metric-value {val_style}">{val}</div>
                 </div>
                 """, unsafe_allow_html=True)
-        st.markdown("</div>", unsafe_allow_html=True)
+        
+        # --- POINT 3: WHATSAPP DISPATCH LOGIC INTEGRATION ---
+        dept_context = st.session_state.get('selected_dept', 'Safety Desk')
+        raw_msg = (
+            f"⚠️ *SOLAPUR DIVISION SAFETY PORTAL ALERT*\n"
+            f"----------------------------------------\n"
+            f"📢 *Department:* {dept_context}\n"
+            f"📍 *{title_column}:* {title_value}\n\n"
+            f"*Current Field Status Metrics:*\n" + "\n".join(whatsapp_body_segments) + "\n\n"
+            f"🕒 _Report Time: {pd.Timestamp.now().strftime('%d-%m-%Y %H:%M:%S')}_\n"
+            f"🔗 Please verify asset statuses on site immediately."
+        )
+        
+        # Safely convert spacing, linebreaks, and emojis into clean browser URL format strings
+        encoded_msg = urllib.parse.quote(raw_msg)
+        whatsapp_url = f"https://api.whatsapp.com/send?text={encoded_msg}"
+        
+        # Render the custom professional action link inside the container block base
+        st.markdown(f"""
+            <div style="text-align: right;">
+                <a href="{whatsapp_url}" target="_blank" class="whatsapp-btn">
+                    📲 Dispatch Asset Status to WhatsApp
+                </a>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
 # ====================== PAGINATION HELPER FUNCTION ======================
 def handle_pagination(key_prefix, total_items, items_per_page):
@@ -257,23 +312,20 @@ def render_export_desk(df, prefix_name):
             with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
                 df.to_excel(writer, index=False, sheet_name="Asset Inventory Log")
                 
-                # Snag a reference handle on the active openpyxl worksheet structure
                 workbook = writer.book
                 worksheet = workbook["Asset Inventory Log"]
                 worksheet.views.sheetView[0].showGridLines = True
                 
-                # Define specific structural themes for styles
                 header_font = Font(name="Segoe UI", size=11, bold=True, color="FFFFFF")
-                header_fill = PatternFill(start_color="1E3A8A", end_color="1E3A8A", fill_type="solid") # Deep Corporate Navy
+                header_fill = PatternFill(start_color="1E3A8A", end_color="1E3A8A", fill_type="solid") 
                 data_font = Font(name="Segoe UI", size=10, bold=False, color="000000")
-                zebra_fill = PatternFill(start_color="F1F5F9", end_color="F1F5F9", fill_type="solid") # Slate Accent Row tint
+                zebra_fill = PatternFill(start_color="F1F5F9", end_color="F1F5F9", fill_type="solid") 
                 
                 thin_side = Side(border_style="thin", color="CBD5E1")
                 cell_border = Border(left=thin_side, right=thin_side, top=thin_side, bottom=thin_side)
                 center_align = Alignment(horizontal="center", vertical="center")
                 left_align = Alignment(horizontal="left", vertical="center")
                 
-                # Format Header Row
                 for cell in worksheet[1]:
                     cell.font = header_font
                     cell.fill = header_fill
@@ -281,7 +333,6 @@ def render_export_desk(df, prefix_name):
                     cell.border = cell_border
                 worksheet.row_dimensions[1].height = 26
                 
-                # Format Data Rows
                 for row_idx, row in enumerate(worksheet.iter_rows(min_row=2, max_row=worksheet.max_row, min_col=1, max_col=worksheet.max_column), start=2):
                     worksheet.row_dimensions[row_idx].height = 20
                     is_even = (row_idx % 2 == 0)
@@ -289,16 +340,13 @@ def render_export_desk(df, prefix_name):
                     for cell in row:
                         cell.font = data_font
                         cell.border = cell_border
-                        # Apply zebra striping rows
                         if is_even:
                             cell.fill = zebra_fill
-                        # Align based on content type
                         if isinstance(cell.value, (int, float)):
                             cell.alignment = center_align
                         else:
                             cell.alignment = left_align
 
-                # Dynamically calculate and inject explicit column widths to prevent cut-off values
                 for col in worksheet.columns:
                     max_len = max(len(str(cell.value or '')) for cell in col)
                     col_letter = get_column_letter(col[0].column)
