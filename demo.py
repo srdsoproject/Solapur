@@ -34,7 +34,6 @@ html, body, [class*="css"] { font-family: "Segoe UI", -apple-system, BlinkMacSys
 [data-testid="stSidebar"] { background: linear-gradient(180deg, #f0fdf4 0%, #dcfce7 100%); box-shadow: 4px 0 15px rgba(0,0,0,0.04); border-right: 1px solid #bbf7d0; }
 [data-testid="stSidebar"] h3 { color: #14532d !important; }
 [data-testid="stSidebar"] caption, [data-testid="stSidebar"] p, [data-testid="stSidebar"] span { color: #166534 !important; }
-button[data-baseweb="tab"] { font-size: 16px !important; font-weight: 600 !important; padding: 12px 24px !important; }
 .header-box { background: linear-gradient(135deg, #1e3a8a 0%, #0369a1 100%); padding: 30px 40px; border-radius: 12px; margin-bottom: 25px; box-shadow: 0 10px 30px rgba(30, 58, 138, 0.12); border-left: 6px solid #38bdf8; }
 .header-box h1 { color: #ffffff !important; font-size: 34px; font-weight: 800; margin: 0 0 6px 0; letter-spacing: -0.5px; }
 .header-box h4 { color: #bae6fd !important; font-weight: 400; margin: 0; letter-spacing: 0.2px; }
@@ -150,14 +149,12 @@ def render_dynamic_grid(df, icon_emoji="📦", col_layout=4, is_inventory=False)
 
 # ====================== PAGINATION HELPER FUNCTION ======================
 def handle_pagination(key_prefix, total_items, items_per_page):
-    """Creates navigation engine controls for changing rows slices."""
     page_key = f"{key_prefix}_page"
     if page_key not in st.session_state:
         st.session_state[page_key] = 0
 
     total_pages = max(1, (total_items + items_per_page - 1) // items_per_page)
     
-    # Auto-adjust bounds if search criteria makes the active page index out of bounds
     if st.session_state[page_key] >= total_pages:
         st.session_state[page_key] = total_pages - 1
 
@@ -169,7 +166,7 @@ def handle_pagination(key_prefix, total_items, items_per_page):
             st.rerun()
             
     with col_p2:
-        st.markdown(f"<p style='text-align: center; font-weight: 600; padding-top:6px; color: #1e3a8a;'>Page {st.session_state[page_key] + 1} of {total_pages} (Total: {total_items} rows)</p>", unsafe_allow_html=True)
+        st.markdown(f"<p style='text-align: center; font-weight: 600; padding-top:6px; color: #1e3a8a;'>Page {st.session_state[page_key] + 1} of {total_pages} (Total Records: {total_items})</p>", unsafe_allow_html=True)
         
     with col_p3:
         if st.button("Next ➡️", key=f"{key_prefix}_next", disabled=(st.session_state[page_key] >= total_pages - 1), use_container_width=True):
@@ -195,22 +192,38 @@ def main_portal():
     
     if st.sidebar.button("🔄 Sync Google Sheets & Clear Cache", use_container_width=True):
         load_secure_sheet.clear()
-        # Clear pagination settings on hard sync
         for key in list(st.session_state.keys()):
             if "_page" in key:
                 st.session_state[key] = 0
         st.rerun()
+        
     if st.sidebar.button("🚪 Terminate Session", use_container_width=True):
         st.session_state.clear()
         st.rerun()
 
-    tab1, tab2, tab3, tab4, tab5 = st.tabs(["🚞 Operating", "🛠️ Engineering", "👨‍✈️ TRO", "⚡ TRD", "🚧 LC Gates"])
+    # --- STATE PRESERVING SIDEBAR ROUTER ---
+    st.sidebar.markdown("---")
+    st.sidebar.markdown("### 🗺️ Department Navigation")
+    
+    available_departments = ["🚞 Operating", "🛠️ Engineering", "👨‍✈️ TRO", "⚡ TRD", "🚧 LC Gates"]
+    
+    if "selected_dept" not in st.session_state:
+        st.session_state.selected_dept = "🚞 Operating"
+        
+    chosen_dept = st.sidebar.radio(
+        "Choose Department View:",
+        available_departments,
+        index=available_departments.index(st.session_state.selected_dept)
+    )
+    st.session_state.selected_dept = chosen_dept
+    
     max_cards = 25
 
     # ---------------------------------------------------------------
-    # TAB 1: OPERATING
+    # BRANCH VIEW 1: OPERATING
     # ---------------------------------------------------------------
-    with tab1:
+    if st.session_state.selected_dept == "🚞 Operating":
+        st.markdown("## 🚞 Operating Assets Matrix")
         df_eq = load_secure_sheet("SHEET_ID", "SHEET_NAME")
         if df_eq.empty:
             st.warning("⚠️ No active rows found inside Equipment Inventory database.")
@@ -241,14 +254,14 @@ def main_portal():
             search_eq = st.text_input("🔍 Operational Search Desk Filter", placeholder=f"Search by {first_col}...", key="search_eq")
             fil_df = df_eq[df_eq[first_col].astype(str).str.contains(search_eq, case=False, na=False)] if search_eq else df_eq
             
-            # Pagination Engine integration
             start, end = handle_pagination("operating", len(fil_df), max_cards)
             render_dynamic_grid(fil_df.iloc[start:end], icon_emoji="🚞", is_inventory=True)
 
     # ---------------------------------------------------------------
-    # TAB 2: ENGINEERING
+    # BRANCH VIEW 2: ENGINEERING
     # ---------------------------------------------------------------
-    with tab2:
+    elif st.session_state.selected_dept == "🛠️ Engineering":
+        st.markdown("## 🛠️ Engineering Infrastructure Matrix")
         df_tr = load_secure_sheet("NEW_SHEET_ID", "NEW_SHEET_NAME")
         if df_tr.empty:
             st.warning("⚠️ No active infrastructure data elements found.")
@@ -263,14 +276,14 @@ def main_portal():
             if search_tr:
                 fil_df_tr = fil_df_tr[fil_df_tr[first_col].astype(str).str.contains(search_tr, case=False, na=False)]
                 
-            # Pagination Engine integration
             start, end = handle_pagination("engineering", len(fil_df_tr), max_cards)
             render_dynamic_grid(fil_df_tr.iloc[start:end], icon_emoji="🛠️")
 
     # ---------------------------------------------------------------
-    # TAB 3: TRO
+    # BRANCH VIEW 3: TRO
     # ---------------------------------------------------------------
-    with tab3:
+    elif st.session_state.selected_dept == "👨‍✈️ TRO":
+        st.markdown("## 👨‍✈️ TRO Facility Operations Matrix")
         df_tro = load_secure_sheet("TRO", "NEW_SHEET_NAME_TRO")
         if df_tro.empty:
             st.warning("⚠️ No active crew facility elements found inside the TRO matrix.")
@@ -285,14 +298,14 @@ def main_portal():
             if search_tro:
                 fil_df_tro = fil_df_tro[fil_df_tro[first_col].astype(str).str.contains(search_tro, case=False, na=False)]
                 
-            # Pagination Engine integration
             start, end = handle_pagination("tro", len(fil_df_tro), max_cards)
             render_dynamic_grid(fil_df_tro.iloc[start:end], icon_emoji="👨‍✈️", col_layout=2)
 
     # ---------------------------------------------------------------
-    # TAB 4: TRD
+    # BRANCH VIEW 4: TRD
     # ---------------------------------------------------------------
-    with tab4:
+    elif st.session_state.selected_dept == "⚡ TRD":
+        st.markdown("## ⚡ TRD Power Allocation Distribution Matrix")
         df_trd = load_secure_sheet("SHEET_ID_TRD", "SHEET_NAME_TRD")
         if df_trd.empty:
             st.warning("⚠️ No active Traction Distribution (TRD) data elements found.")
@@ -307,14 +320,14 @@ def main_portal():
             if search_trd:
                 fil_df_trd = fil_df_trd[fil_df_trd[first_col].astype(str).str.contains(search_trd, case=False, na=False)]
                 
-            # Pagination Engine integration
             start, end = handle_pagination("trd", len(fil_df_trd), max_cards)
             render_dynamic_grid(fil_df_trd.iloc[start:end], icon_emoji="⚡")
 
     # ---------------------------------------------------------------
-    # TAB 5: LC GATES
+    # BRANCH VIEW 5: LC GATES
     # ---------------------------------------------------------------
-    with tab5:
+    elif st.session_state.selected_dept == "🚧 LC Gates":
+        st.markdown("## 🚧 Level Crossing Gates Registry Matrix")
         df_lc = load_secure_sheet("SHEET_ID_LC", "SHEET_NAME_LC")
         if df_lc.empty:
             st.warning("⚠️ No active Level Crossing (LC) Gate structural elements found.")
@@ -329,7 +342,6 @@ def main_portal():
             if search_lc:
                 fil_df_lc = fil_df_lc[fil_df_lc[first_col].astype(str).str.contains(search_lc, case=False, na=False)]
                 
-            # Pagination Engine integration
             start, end = handle_pagination("lc_gates", len(fil_df_lc), max_cards)
             render_dynamic_grid(fil_df_lc.iloc[start:end], icon_emoji="🚧")
 
