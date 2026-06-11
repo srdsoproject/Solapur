@@ -237,7 +237,6 @@ def render_dynamic_grid(df, icon_emoji="📦", col_layout=4, is_inventory=False)
             f"📢 *Department:* {dept_context}\n"
             f"📍 *{title_column}:* {title_value}\n\n"
             f"*Current Field Status Metrics:*\n" + "\n".join(whatsapp_body_segments) + "\n\n"
-            f"🕒 _Report Time: {pd.Timestamp.now().strftime('%d-%m-%Y %H:%M:%S')}_\n"
             f"🔗 Please verify asset statuses on site immediately."
         )
         
